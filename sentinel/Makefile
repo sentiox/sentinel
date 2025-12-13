@@ -1,40 +1,32 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sentinel
-
-PKG_VERSION := $(if $(PKG_VERSION),$(PKG_VERSION),dev_$(shell date +%d%m%Y))
-
 PKG_RELEASE:=1
+PKGARCH:=all
 
-PKG_MAINTAINER:=ITDog <sentinel@itdog.info>
 PKG_LICENSE:=GPL-2.0-or-later
+PKG_MAINTAINER:=Mizoil <mizoil@users.noreply.github.com>
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/sentinel
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+sing-box +curl +jq +kmod-nft-tproxy +coreutils-base64
-	CONFLICTS:=https-dns-proxy nextdns luci-app-passwall luci-app-passwall2
 	TITLE:=Domain routing app
 	URL:=https://sentinel.net
-	PKGARCH:=all
+	DEPENDS:=+sing-box +curl +jq +kmod-nft-tproxy +coreutils-base64
+	CONFLICTS:=https-dns-proxy nextdns luci-app-passwall luci-app-passwall2
 endef
 
 define Package/sentinel/description
-	Domain routing. Use of VLESS, Shadowsocks technologies
-endef
-
-define Build/Configure
-endef
-
-define Build/Compile
+Domain routing. Use of VLESS, Shadowsocks technologies
 endef
 
 define Package/sentinel/prerm
 #!/bin/sh
 
-grep -q "105 sentinel" /etc/iproute2/rt_tables && sed -i "/105 sentinel/d" /etc/iproute2/rt_tables
+grep -q "105 sentinel" /etc/iproute2/rt_tables && \
+	sed -i "/105 sentinel/d" /etc/iproute2/rt_tables
 
 /etc/init.d/sentinel stop
 

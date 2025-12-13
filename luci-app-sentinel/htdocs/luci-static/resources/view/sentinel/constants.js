@@ -38,6 +38,7 @@ const DOMAIN_LIST_OPTIONS = {
     anime: 'Anime',
     youtube: 'Youtube',
     discord: 'Discord',
+    whatsapp: 'Whatsapp',
     meta: 'Meta',
     twitter: 'Twitter (X)',
     hdrezka: 'HDRezka',

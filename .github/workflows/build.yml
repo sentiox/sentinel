@@ -3,7 +3,11 @@ name: Build packages
 on:
   push:
     tags:
-      - v*
+      - "v*"
+
+# 🔴 ВОТ ЭТОГО У ТЕБЯ НЕ ХВАТАЛО
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -19,7 +23,7 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "dev_$(date +%d%m%Y)")
+          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "dev_$(date +%d%mY)")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image

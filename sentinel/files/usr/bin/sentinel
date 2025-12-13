@@ -1222,6 +1222,9 @@ import_community_service_subnet_list_handler() {
     "hetzner")
         URL=$SUBNETS_HETZNER
         ;;
+    "whatsapp")
+        URL=$SUBNETS_WHATSAPP
+        ;;
     "ovh")
         URL=$SUBNETS_OVH
         ;;
