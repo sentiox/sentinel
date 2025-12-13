@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
 SRC_DIR="htdocs/luci-static/resources/view/sentinel"
 OUT_POT="po/templates/sentinel.pot"
@@ -12,7 +11,6 @@ if [ ${#FILES[@]} -eq 0 ]; then
     exit 1
 fi
 
-mapfile -t FILES < <(printf '%s\n' "${FILES[@]}" | sort)
 mkdir -p "$(dirname "$OUT_POT")"
 
 echo "Generating POT template from JS files in $SRC_DIR"

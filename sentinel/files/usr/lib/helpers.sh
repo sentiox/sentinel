@@ -105,6 +105,37 @@ get_domain_resolver_tag() {
     echo "$section-$postfix"
 }
 
+# Constructs and returns a ruleset tag using section, name, optional type, and a fixed postfix
+get_ruleset_tag() {
+    local section="$1"
+    local name="$2"
+    local type="$3"
+    local postfix="ruleset"
+
+    if [ -n "$type" ]; then
+        echo "$section-$name-$type-$postfix"
+    else
+        echo "$section-$name-$postfix"
+    fi
+}
+
+# Determines the ruleset format based on the file extension (json → source, srs → binary)
+get_ruleset_format_by_file_extension() {
+    local file_extension="$1"
+
+    local format
+    case "$file_extension" in
+    json) format="source" ;;
+    srs) format="binary" ;;
+    *)
+        log "Unsupported file extension: .$file_extension"
+        return 1
+        ;;
+    esac
+
+    echo "$format"
+}
+
 # Converts a comma-separated string into a JSON array string
 comma_string_to_json_array() {
     local input="$1"
@@ -125,12 +156,6 @@ url_decode() {
     printf '%b' "$(echo "$encoded" | sed 's/+/ /g; s/%/\\x/g')"
 }
 
-# Returns the scheme (protocol) part of a URL
-url_get_scheme() {
-    local url="$1"
-    echo "${url%%://*}"
-}
-
 # Extracts the userinfo (username[:password]) part from a URL
 url_get_userinfo() {
     local url="$1"
@@ -140,23 +165,13 @@ url_get_userinfo() {
 # Extracts the host part from a URL
 url_get_host() {
     local url="$1"
-
-    url="${url#*://}"
-    url="${url#*@}"
-    url="${url%%[/?#]*}"
-
-    echo "${url%%:*}"
+    echo "$url" | sed -n -e 's#^[^:/?]*://##' -e 's#^[^/]*@##' -e 's#\([:/].*\|$\)##p'
 }
 
 # Extracts the port number from a URL
 url_get_port() {
     local url="$1"
-
-    url="${url#*://}"
-    url="${url#*@}"
-    url="${url%%[/?#]*}"
-
-    [[ "$url" == *:* ]] && echo "${url#*:}" || echo ""
+    echo "$url" | sed -n -e 's#^[^:/?]*://##' -e 's#^[^/]*@##' -e 's#^[^/]*:\([0-9][0-9]*\).*#\1#p'
 }
 
 # Extracts the path from a URL (without query or fragment; returns "/" if empty)
@@ -253,6 +268,25 @@ migration_rename_config_key() {
     fi
 }
 
+# Download URL content directly
+download_to_stream() {
+    local url="$1"
+    local http_proxy_address="$2"
+    local retries="${3:-3}"
+    local wait="${4:-2}"
+
+    for attempt in $(seq 1 "$retries"); do
+        if [ -n "$http_proxy_address" ]; then
+            http_proxy="http://$http_proxy_address" https_proxy="http://$http_proxy_address" wget -qO- "$url" | sed 's/\r$//' && break
+        else
+            wget -qO- "$url" | sed 's/\r$//' && break
+        fi
+
+        log "Attempt $attempt/$retries to download $url failed" "warn"
+        sleep "$wait"
+    done
+}
+
 # Download URL to file
 download_to_file() {
     local url="$1"
@@ -271,17 +305,29 @@ download_to_file() {
         log "Attempt $attempt/$retries to download $url failed" "warn"
         sleep "$wait"
     done
-}
-
-# Converts Windows-style line endings (CRLF) to Unix-style (LF)
-convert_crlf_to_lf() {
-    local filepath="$1"
 
     if grep -q $'\r' "$filepath"; then
-        log "File '$filepath' contains CRLF line endings. Converting to LF..." "debug"
-        local tmpfile
-        tmpfile=$(mktemp)
-        tr -d '\r' < "$filepath" > "$tmpfile" && mv "$tmpfile" "$filepath" || rm -f "$tmpfile"
+        log "Downloaded file has Windows line endings (CRLF). Converting to Unix (LF)"
+        sed -i 's/\r$//' "$filepath"
+    fi
+}
+
+# Decompiles a sing-box SRS binary file into a JSON ruleset file
+decompile_srs_file() {
+    local binary_filepath="$1"
+    local output_filepath="$2"
+
+    log "Decompiling $binary_filepath to $output_filepath" "debug"
+
+    if ! file_exists "$binary_filepath"; then
+        log "File $binary_filepath not found" "error"
+        return 1
+    fi
+
+    sing-box rule-set decompile "$binary_filepath" -o "$output_filepath"
+    if [[ $? -ne 0 ]]; then
+        log "Decompilation command failed for $binary_filepath" "error"
+        return 1
     fi
 }
 

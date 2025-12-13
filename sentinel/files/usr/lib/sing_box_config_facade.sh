@@ -34,7 +34,7 @@ sing_box_cf_add_dns_server() {
             "$domain_resolver" "$detour")
         ;;
     *)
-        log "Unsupported DNS server type: $type. Aborted." "fatal"
+        log "Unsupported DNS server type: $type"
         exit 1
         ;;
     esac
@@ -64,35 +64,8 @@ sing_box_cf_add_proxy_outbound() {
     url=$(url_decode "$url")
     url=$(url_strip_fragment "$url")
 
-    local scheme
-    scheme="$(url_get_scheme "$url")"
+    local scheme="${url%%://*}"
     case "$scheme" in
-    socks4 | socks4a | socks5)
-        local tag host port version userinfo username password udp_over_tcp
-
-        tag=$(get_outbound_tag_by_section "$section")
-        host=$(url_get_host "$url")
-        port=$(url_get_port "$url")
-        version="${scheme#socks}"
-        if [ "$scheme" = "socks5" ]; then
-            userinfo=$(url_get_userinfo "$url")
-            if [ -n "$userinfo" ]; then
-                username="${userinfo%%:*}"
-                password="${userinfo#*:}"
-            fi
-        fi
-        config="$(sing_box_cm_add_socks_outbound \
-            "$config" \
-            "$tag" \
-            "$host" \
-            "$port" \
-            "$version" \
-            "$username" \
-            "$password" \
-            "" \
-            "$([ "$udp_over_tcp" == "1" ] && echo 2)" # if udp_over_tcp is enabled, enable version 2
-        )"
-        ;;
     vless)
         local tag host port uuid flow packet_encoding
         tag=$(get_outbound_tag_by_section "$section")
@@ -147,23 +120,8 @@ sing_box_cf_add_proxy_outbound() {
         config=$(_add_outbound_security "$config" "$tag" "$url")
         config=$(_add_outbound_transport "$config" "$tag" "$url")
         ;;
-    hysteria2 | hy2)
-        local tag host port password obfuscator_type obfuscator_password upload_mbps download_mbps
-        tag=$(get_outbound_tag_by_section "$section")
-        host=$(url_get_host "$url")
-        port="$(url_get_port "$url")"
-        password=$(url_get_userinfo "$url")
-        obfuscator_type=$(url_get_query_param "$url" "obfs")
-        obfuscator_password=$(url_get_query_param "$url" "obfs-password")
-        upload_mbps=$(url_get_query_param "$url" "upmbps")
-        download_mbps=$(url_get_query_param "$url" "downmbps")
-
-        config=$(sing_box_cm_add_hysteria2_outbound "$config" "$tag" "$host" "$port" "$password" "$obfuscator_type" \
-            "$obfuscator_password" "$upload_mbps" "$download_mbps")
-        config=$(_add_outbound_security "$config" "$tag" "$url")
-        ;;
     *)
-        log "Unsupported proxy $scheme type. Aborted." "fatal"
+        log "Unsupported proxy $scheme type"
         exit 1
         ;;
     esac
@@ -176,20 +134,13 @@ _add_outbound_security() {
     local outbound_tag="$2"
     local url="$3"
 
-    local security scheme
+    local security
     security=$(url_get_query_param "$url" "security")
-    if [ -z "$security" ]; then
-        scheme="$(url_get_scheme "$url")"
-        if [ "$scheme" = "hysteria2" ] || [ "$scheme" = "hy2" ]; then
-            security="tls"
-        fi
-    fi
-
     case "$security" in
     tls | reality)
         local sni insecure alpn fingerprint public_key short_id
         sni=$(url_get_query_param "$url" "sni")
-        insecure=$(_get_insecure_query_param_from_url "$url")
+        insecure=$(url_get_query_param "$url" "allowInsecure")
         alpn=$(comma_string_to_json_array "$(url_get_query_param "$url" "alpn")")
         fingerprint=$(url_get_query_param "$url" "fp")
         public_key=$(url_get_query_param "$url" "pbk")
@@ -216,18 +167,6 @@ _add_outbound_security() {
     echo "$config"
 }
 
-_get_insecure_query_param_from_url() {
-    local url="$1"
-
-    local insecure
-    insecure=$(url_get_query_param "$url" "allowInsecure")
-    if [ -z "$insecure" ]; then
-        insecure=$(url_get_query_param "$url" "insecure")
-    fi
-
-    echo "$insecure"
-}
-
 _add_outbound_transport() {
     local config="$1"
     local outbound_tag="$2"
@@ -249,12 +188,7 @@ _add_outbound_transport() {
         ;;
     grpc)
         # TODO(ampetelin): Add handling of optional gRPC parameters; example links are needed.
-        local grpc_service_name
-        grpc_service_name=$(url_get_query_param "$url" "serviceName")
-
-        config=$(
-            sing_box_cm_set_grpc_transport_for_outbound "$config" "$outbound_tag" "$grpc_service_name"
-        )
+        config=$(sing_box_cm_set_grpc_transport_for_outbound "$config" "$outbound_tag")
         ;;
     *)
         log "Unknown transport '$transport' detected." "error"

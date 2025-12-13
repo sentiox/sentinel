@@ -21,9 +21,9 @@ SERVICE_TAG="__service_tag"
 #######################################
 # Configure the logging section of a sing-box JSON configuration.
 # Arguments:
-#   config: string, JSON configuration
+#   config: JSON configuration (string)
 #   disabled: boolean, true to disable logging
-#   level: string, log level. One of: trace debug info warn error fatal panic.
+#   level: string, e.g., "info", "debug", "warn"
 #   timestamp: boolean, true to include timestamps
 # Outputs:
 #   Writes updated JSON configuration to stdout
@@ -50,7 +50,7 @@ sing_box_cm_configure_log() {
 #######################################
 # Configure the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   final: string, default dns server tag
 #   strategy: string, default domain strategy for resolving the domain names
 #   independent_cache: boolean, whether to use an independent DNS cache
@@ -82,12 +82,12 @@ sing_box_cm_configure_dns() {
 #######################################
 # Add a UDP DNS server to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the DNS server
 #   server_address: string, IP address or hostname of the DNS server
-#   server_port: string or integer, port of the DNS server
-#   domain_resolver: string, domain resolver to use for resolving domain names (optional)
-#   detour: string, tag of the upstream outbound (optional)
+#   server_port: string or number, port of the DNS server
+#   domain_resolver: string, domain resolver to use for resolving domain names
+#   detour: string, tag of the upstream outbound
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -122,12 +122,12 @@ sing_box_cm_add_udp_dns_server() {
 #######################################
 # Add a TLS DNS server to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the DNS server
 #   server_address: string, IP address or hostname of the DNS server
-#   server_port: string or integer, port of the DNS server
-#   domain_resolver: string, domain resolver to use for resolving domain names (optional)
-#   detour: string, tag of the upstream outbound (optional)
+#   server_port: string or number, port of the DNS server
+#   domain_resolver: string, domain resolver to use for resolving domain names
+#   detour: string, tag of the upstream outbound
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -162,14 +162,14 @@ sing_box_cm_add_tls_dns_server() {
 #######################################
 # Add an HTTPS DNS server to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the DNS server
 #   server_address: string, IP address or hostname of the DNS server
-#   server_port: string or integer, port of the DNS server
-#   path: string, URL path for HTTPS DNS requests (optional)
-#   headers: string, additional headers for HTTPS DNS requests (optional)
-#   domain_resolver: string, domain resolver to use for resolving domain names (optional)
-#   detour: string, tag of the upstream outbound (optional)
+#   server_port: string or number, port of the DNS server
+#   path: string, optional URL path for HTTPS DNS requests
+#   headers: string, optional additional headers for HTTPS DNS requests
+#   domain_resolver: string, domain resolver to use for resolving domain names
+#   detour: string, tag of the upstream outbound
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -210,7 +210,7 @@ sing_box_cm_add_https_dns_server() {
 #######################################
 # Add a FakeIP DNS server to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the DNS server
 #   inet4_range: string, IPv4 range used for fake IP mapping
 # Outputs:
@@ -236,7 +236,7 @@ sing_box_cm_add_fakeip_dns_server() {
 #######################################
 # Add a DNS routing rule to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   server: string, target DNS server for the rule
 #   tag: string, identifier for the route rule
 # Outputs:
@@ -263,10 +263,10 @@ sing_box_cm_add_dns_route_rule() {
 #######################################
 # Patch a DNS routing rule in the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the rule to patch
 #   key: string, the key in the rule to update or add
-#   value: string, JSON value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -304,9 +304,9 @@ sing_box_cm_patch_dns_route_rule() {
 #######################################
 # Add a DNS reject rule to the DNS section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   key: string, the key to set for the reject rule
-#   value: string, JSON value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -331,10 +331,10 @@ sing_box_cm_add_dns_reject_rule() {
 #######################################
 # Add a TProxy inbound to the inbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the inbound
 #   listen_address: string, IP address to listen on
-#   listen_port: integer, port to listen on
+#   listen_port: number, port to listen on
 #   tcp_fast_open: boolean, enable or disable TCP Fast Open
 #   udp_fragment: boolean, enable or disable UDP fragmentation
 # Outputs:
@@ -369,10 +369,10 @@ sing_box_cm_add_tproxy_inbound() {
 #######################################
 # Add a Direct inbound to the inbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the inbound
 #   listen_address: string, IP address to listen on
-#   listen_port: integer, port to listen on
+#   listen_port: number, port to listen on
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -399,10 +399,10 @@ sing_box_cm_add_direct_inbound() {
 #######################################
 # Add a Mixed inbound to the inbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the inbound
 #   listen_address: string, IP address to listen on
-#   listen_port: integer, port to listen on
+#   listen_port: number, port to listen on
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -429,7 +429,7 @@ sing_box_cm_add_mixed_inbound() {
 #######################################
 # Add a Direct outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
 # Outputs:
 #   Writes updated JSON configuration to stdout
@@ -449,23 +449,23 @@ sing_box_cm_add_direct_outbound() {
 }
 
 #######################################
-# Add a SOCKS outbound to the outbounds section of a sing-box JSON configuration.
+# Add a SOCKS5 outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
-#   server_address: string, IP address or hostname of the SOCKS server
-#   server_port: integer, port of the SOCKS server
-#   version: string, SOCKS version (optional)
-#   username: string, username for authentication (optional)
-#   password: string, password for authentication (optional)
-#   network: string, network type (e.g., "tcp") (optional)
-#   udp_over_tcp: integer, version for UDP over TCP (optional)
+#   server_address: string, IP address or hostname of the SOCKS5 server
+#   server_port: number, port of the SOCKS5 server
+#   version: string, optional SOCKS version
+#   username: string, optional username for authentication
+#   password: string, optional password for authentication
+#   network: string, optional network type (e.g., "tcp")
+#   udp_over_tcp: number, optional version for UDP over TCP
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
-#   CONFIG=$(sing_box_cm_add_socks_outbound "$CONFIG" "socks5-out" "192.168.1.10" 1080)
+#   CONFIG=$(sing_box_cm_add_socks5_outbound "$CONFIG" "socks5-out" "192.168.1.10" 1080)
 #######################################
-sing_box_cm_add_socks_outbound() {
+sing_box_cm_add_socks5_outbound() {
     local config="$1"
     local tag="$2"
     local server_address="$3"
@@ -509,16 +509,16 @@ sing_box_cm_add_socks_outbound() {
 #######################################
 # Add a Shadowsocks outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
 #   server_address: string, IP address or hostname of the Shadowsocks server
-#   server_port: integer, port of the Shadowsocks server
+#   server_port: number, port of the Shadowsocks server
 #   method: string, encryption method
 #   password: string, password for encryption
-#   network: string, network type (e.g., "tcp") (optional)
-#   udp_over_tcp: integer, version for UDP over TCP (optional)
-#   plugin: string, plugin name (optional)
-#   plugin_opts: string, plugin options (optional)
+#   network: string, optional network type (e.g., "tcp")
+#   udp_over_tcp: number, optional version for UDP over TCP
+#   plugin: string, optional plugin name
+#   plugin_opts: string, optional plugin options
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -573,14 +573,14 @@ sing_box_cm_add_shadowsocks_outbound() {
 #######################################
 # Add a VLESS outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
 #   server_address: string, IP address or hostname of the VLESS server
-#   server_port: integer, port of the VLESS server
+#   server_port: number, port of the VLESS server
 #   uuid: string, user UUID
-#   flow: string, flow setting (optional)
-#   network: string, network type (e.g., "tcp") (optional)
-#   packet_encoding: string, packet encoding method (optional)
+#   flow: string, optional flow setting
+#   network: string, optional network type (e.g., "tcp")
+#   packet_encoding: string, optional packet encoding method
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -624,12 +624,12 @@ sing_box_cm_add_vless_outbound() {
 #######################################
 # Add a Trojan outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: string, JSON configuration
 #   tag: string, identifier for the outbound
 #   server_address: string, IP address or hostname of the Trojan server
-#   server_port: integer, port of the Trojan server
+#   server_port: number, port of the Trojan server
 #   password: string, password for authentication
-#   network: string, network type (e.g., "tcp") (optional)
+#   network: string, optional network type (e.g., "tcp")
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -644,12 +644,12 @@ sing_box_cm_add_trojan_outbound() {
     local network="$6"
 
     echo "$config" | jq \
-        --arg tag "$tag" \
-        --arg server_address "$server_address" \
-        --arg server_port "$server_port" \
-        --arg password "$password" \
-        --arg network "$network" \
-        '.outbounds += [(
+    --arg tag "$tag" \
+    --arg server_address "$server_address" \
+    --arg server_port "$server_port" \
+    --arg password "$password" \
+    --arg network "$network" \
+    '.outbounds += [(
         {
           type: "trojan",
           tag: $tag,
@@ -662,75 +662,14 @@ sing_box_cm_add_trojan_outbound() {
 }
 
 #######################################
-# Add a Hysteria2 outbound to the outbounds section of a sing-box JSON configuration.
-# Arguments:
-#   config: string (JSON), sing-box configuration to modify
-#   tag: string, identifier for the outbound
-#   server_address: string, IP address or hostname of the Hysteria2 server
-#   server_port: integer, port of the Hysteria2 server
-#   password: string, password for authentication
-#   obfuscator_type: string, obfuscation type (optional)
-#   obfuscator_password: string, obfuscation password (optional)
-#   upload_mbps: integer, upload bandwidth limit in Mbps (optional)
-#   download_mbps: integer, download bandwidth limit in Mbps (optional)
-#   network: string, network type (e.g., "udp") (optional)
-# Outputs:
-#   Writes updated JSON configuration to stdout
-# Example:
-#   CONFIG=$(sing_box_cm_add_hysteria2_outbound "$CONFIG" "hysteria2-out" "example.com" 443 "supersecret" \
-#       "salamander" "obfs-pass" "50" "200" "udp")
-#######################################
-sing_box_cm_add_hysteria2_outbound() {
-    local config="$1"
-    local tag="$2"
-    local server_address="$3"
-    local server_port="$4"
-    local password="$5"
-    local obfuscator_type="$6"
-    local obfuscator_password="$7"
-    local upload_mbps="$8"
-    local download_mbps="$9"
-    local network="${10}"
-
-    echo "$config" | jq \
-        --arg tag "$tag" \
-        --arg server_address "$server_address" \
-        --arg server_port "$server_port" \
-        --arg password "$password" \
-        --arg obfuscator_type "$obfuscator_type" \
-        --arg obfuscator_password "$obfuscator_password" \
-        --arg upload_mbps "$upload_mbps" \
-        --arg download_mbps "$download_mbps" \
-        --arg network "$network" \
-        '.outbounds += [(
-        {
-          type: "hysteria2",
-          tag: $tag,
-          server: $server_address,
-          server_port: ($server_port | tonumber),
-          password: $password
-        }
-        + (if $obfuscator_type != "" and $obfuscator_password != "" then {
-            obfs: {
-                type: $obfuscator_type,
-                password: $obfuscator_password
-            }
-        } else {} end)
-        + (if $upload_mbps != "" then {up_mbps: ($upload_mbps | tonumber)} else {} end)
-        + (if $download_mbps != "" then {down_mbps: ($download_mbps | tonumber)} else {} end)
-        + (if $network != "" then {network: $network} else {} end)
-    )]'
-}
-
-#######################################
 # Set gRPC transport settings for an outbound in a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the outbound to modify
-#   service_name: string, gRPC service name (optional)
-#   idle_timeout: string or integer, idle timeout (optional)
-#   ping_timeout: string or integer, ping timeout (optional)
-#   permit_without_stream: boolean, flag for permitting without stream (optional)
+#   service_name: string, optional gRPC service name
+#   idle_timeout: string or number, optional idle timeout
+#   ping_timeout: string or number, optional ping timeout
+#   permit_without_stream: boolean, optional flag for permitting without stream
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -770,12 +709,12 @@ sing_box_cm_set_grpc_transport_for_outbound() {
 #######################################
 # Set WebSocket transport settings for an outbound in a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the outbound to modify
 #   path: string, WebSocket path
-#   host: string, Host header for WebSocket (optional)
-#   max_early_data: integer, maximum early data (optional)
-#   early_data_header_name: string, header name for early data (optional)
+#   host: string, optional Host header for WebSocket
+#   max_early_data: number, optional maximum early data
+#   early_data_header_name: string, optional header name for early data
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -820,14 +759,14 @@ sing_box_cm_set_ws_transport_for_outbound() {
 #######################################
 # Set TLS settings for an outbound in a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the outbound to modify
-#   server_name: string, used to verify the hostname on the returned certificates (optional)
-#   insecure: boolean, accept any server certificate (optional)
-#   alpn: string, JSON value, supported application level protocols (optional)
-#   utls_fingerprint: string, uTLS fingerprint (optional)
-#   reality_public_key: string, Reality public key (optional)
-#   reality_short_id: string, Reality short ID (optional)
+#   server_name: string, optional, used to verify the hostname on the returned certificates
+#   insecure: boolean, accept any server certificate
+#   alpn: JSON value or null, optional supported application level protocols
+#   utls_fingerprint: string, optional uTLS fingerprint
+#   reality_public_key: string, optional Reality public key
+#   reality_short_id: string, optional Reality short ID
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -886,7 +825,7 @@ sing_box_cm_set_tls_for_outbound() {
 #######################################
 # Add a Direct outbound with a specific network interface to a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
 #   interface: string, network interface to bind the outbound
 #   domain_resolver: string, tag of the domain resolver to be used for this outbound (optional)
@@ -918,9 +857,9 @@ sing_box_cm_add_interface_outbound() {
 #######################################
 # Add a raw outbound JSON object to the outbounds section of a sing-box configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the outbound
-#   raw_outbound: string, JSON object, the raw outbound configuration to add
+#   raw_outbound: JSON object, the raw outbound configuration to add
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -942,14 +881,14 @@ sing_box_cm_add_raw_outbound() {
 #######################################
 # Add a URLTest outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration
 #   tag: string, identifier for the URLTest outbound
-#   outbounds: string, JSON array of outbound tags to test
-#   url: string, URL to probe (optional)
-#   interval: string, test interval (e.g., "10s") (optional)
-#   tolerance: string or integer, max latency difference tolerated (optional)
-#   idle_timeout: string or integer, idle timeout duration (optional)
-#   interrupt_exist_connections: boolean, flag to interrupt existing connections ("true"/"false") (optional)
+#   outbounds: JSON array of outbound tags to test
+#   url: URL to probe (optional)
+#   interval: test interval (e.g., "10s") (optional)
+#   tolerance: max latency difference tolerated (optional)
+#   idle_timeout: idle timeout duration (optional)
+#   interrupt_exist_connections: flag to interrupt existing connections ("true"/"false") (optional)
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -990,11 +929,11 @@ sing_box_cm_add_urltest_outbound() {
 #######################################
 # Add a Selector outbound to the outbounds section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration
 #   tag: string, identifier for the Selector outbound
-#   outbounds: string (JSON), array of outbound tags to choose from
-#   default: string, default outbound tag if none selected
-#   interrupt_exist_connections: boolean, flag to interrupt existing connections ("true"/"false") (optional)
+#   outbounds: JSON array of outbound tags to choose from
+#   default: default outbound tag if none selected (optional)
+#   interrupt_exist_connections: flag to interrupt existing connections ("true"/"false") (optional)
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1026,11 +965,10 @@ sing_box_cm_add_selector_outbound() {
 #######################################
 # Configure the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   final: string, final outbound tag for unmatched traffic
 #   auto_detect_interface: boolean, enable or disable automatic interface detection
 #   default_domain_resolver: string, default DNS resolver for domain-based routing
-#   default_interface: string, default network interface to use when auto detection is disabled (optional)
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1041,28 +979,24 @@ sing_box_cm_configure_route() {
     local final="$2"
     local auto_detect_interface="$3"
     local default_domain_resolver="$4"
-    local default_interface="$5"
 
     echo "$config" | jq \
         --arg final "$final" \
         --argjson auto_detect_interface "$auto_detect_interface" \
         --arg default_domain_resolver "$default_domain_resolver" \
-        --arg default_interface "$default_interface" \
         '.route = {
             rules: (.route.rules // []),
             rule_set: (.route.rule_set // []),
             final: $final,
             auto_detect_interface: $auto_detect_interface,
             default_domain_resolver: $default_domain_resolver
-        }
-        + (if $default_interface != "" then { default_interface: $default_interface } else {} end)
-        '
+        }'
 }
 
 #######################################
 # Add a routing rule to the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the route rule
 #   inbound: string, inbound tag to match
 #   outbound: string, outbound tag to route matched traffic to
@@ -1093,10 +1027,10 @@ sing_box_cm_add_route_rule() {
 #######################################
 # Patch a routing rule in the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the route rule to patch
 #   key: string, the key in the rule to update or add
-#   value: string (JSON), value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1132,9 +1066,9 @@ sing_box_cm_patch_route_rule() {
 #######################################
 # Add a reject rule to the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   key: string, the key to set for the reject rule
-#   value: string (JSON), value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1159,9 +1093,9 @@ sing_box_cm_add_reject_route_rule() {
 #######################################
 # Add a hijack-dns rule to the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   key: string, the key to set for the hijack-dns rule
-#   value: string (JSON), value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1186,7 +1120,7 @@ sing_box_cm_add_hijack_dns_route_rule() {
 #######################################
 # Add a route-options rule to the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the route-options rule
 # Outputs:
 #   Writes updated JSON configuration to stdout
@@ -1209,9 +1143,9 @@ sing_box_cm_add_options_route_rule() {
 #######################################
 # Add a sniff rule to the route section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   key: string, the key to set for the sniff rule
-#   value: string (JSON), value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1237,7 +1171,7 @@ sing_box_cm_sniff_route_rule() {
 #######################################
 # Add an inline ruleset to the route.rule_set section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the inline ruleset
 # Outputs:
 #   Writes updated JSON configuration to stdout
@@ -1259,10 +1193,10 @@ sing_box_cm_add_inline_ruleset() {
 #######################################
 # Add or update a rule in an inline ruleset within the route.rule_set section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier of the inline ruleset
 #   key: string, the key in the ruleset to update or add
-#   value: string (JSON), value to assign to the key
+#   value: JSON value to assign to the key
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1299,7 +1233,7 @@ sing_box_cm_add_inline_ruleset_rule() {
 #######################################
 # Add a local ruleset to the route.rule_set section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the local ruleset
 #   format: string, format of the local ruleset ("source" or "binary")
 #   path: string, file path to the local ruleset
@@ -1330,12 +1264,12 @@ sing_box_cm_add_local_ruleset() {
 #######################################
 # Add a remote ruleset to the route.rule_set section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   tag: string, identifier for the remote ruleset
 #   format: string, format of the remote ruleset ("source" or "binary")
 #   url: string, URL to download the ruleset from
-#   download_detour: string, detour tag for downloading (optional)
-#   update_interval: string, update interval for the ruleset (optional)
+#   download_detour: string, optional detour tag for downloading
+#   update_interval: string, optional update interval for the ruleset
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1371,7 +1305,7 @@ sing_box_cm_add_remote_ruleset() {
 #######################################
 # Configure the experimental cache_file section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   enabled: boolean, enable or disable file caching
 #   path: string, file path for cache storage
 #   store_fakeip: boolean, whether to store fake IPs in the cache
@@ -1400,10 +1334,9 @@ sing_box_cm_configure_cache_file() {
 #######################################
 # Configure the experimental clash_api section of a sing-box JSON configuration.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
-#   external_controller: string, API listening address; Clash API will be disabled if empty
-#   external_ui: string, path to static web resources to serve at http://{{external-controller}}/ui (optional)
-#   secret: string, secret for the RESTful API Authenticate by specifying HTTP header (optional)
+#   config: JSON configuration (string)
+#   external_controller: string, URL or path for the external controller
+#   external_ui: string, URL or path for the external UI
 # Outputs:
 #   Writes updated JSON configuration to stdout
 # Example:
@@ -1413,23 +1346,65 @@ sing_box_cm_configure_clash_api() {
     local config="$1"
     local external_controller="$2"
     local external_ui="$3"
-    local secret="$4"
 
     echo "$config" | jq \
         --arg external_controller "$external_controller" \
         --arg external_ui "$external_ui" \
-        --arg secret "$secret" \
         '.experimental.clash_api = {
             external_controller: $external_controller,
-        }
-        + (if $external_ui != "" then { external_ui: $external_ui } else {} end)
-        + (if $secret != "" then { secret: $secret } else {} end)'
+            external_ui: $external_ui
+        }'
+}
+
+#######################################
+# Create a local source ruleset JSON file for sing-box.
+# Arguments:
+#   filepath: path to the JSON file to create
+# Example:
+#   sing_box_cm_create_local_source_ruleset "/tmp/sing-box/ruleset.json"
+#######################################
+sing_box_cm_create_local_source_ruleset() {
+    local filepath="$1"
+
+    jq -n '{version: 3, rules: []}' > "$filepath"
+}
+
+#######################################
+# Patch a local source ruleset JSON file for sing-box by adding unique! values to a given key.
+# Arguments:
+#   filepath: path to the JSON file to patch
+#   key: the ruleset key to update (e.g., "ip_cidr")
+#   value: a JSON array of values to add to the key
+# Example:
+#   sing_box_cm_patch_local_source_ruleset_rules "/tmp/sing-box/ruleset.json" "ip_cidr" '["1.1.1.1","2.2.2.2"]'
+#######################################
+sing_box_cm_patch_local_source_ruleset_rules() {
+    local filepath="$1"
+    local key="$2"
+    local value="$3"
+
+    value=$(_normalize_arg "$value")
+
+    local content
+    content="$(cat "$filepath")"
+
+    echo "$content" | jq \
+        --arg key "$key" \
+        --argjson value "$value" '
+        ([.rules[]?[$key][]] | unique) as $existing
+        | ($value - $existing) as $value
+        | if ($value | length) > 0 then
+            .rules += [{($key): $value}]
+          else
+            .
+          end
+        ' > "$filepath"
 }
 
 #######################################
 # Save a sing-box JSON configuration to a file, removing service-specific tags.
 # Arguments:
-#   config: string (JSON), sing-box configuration to modify
+#   config: JSON configuration (string)
 #   file_path: string, path to save the configuration file
 # Outputs:
 #   Writes the cleaned JSON configuration to the specified file

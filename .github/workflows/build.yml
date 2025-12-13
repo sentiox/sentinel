@@ -1,111 +1,54 @@
 name: Build packages
-
 on:
-  workflow_dispatch:
   push:
     tags:
-      - '*'
-
-permissions:
-  contents: write
+      - v*
 
 jobs:
-  preparation:
-    name: Setup build version
+  build:
+    name: Build sentinel and luci-app-sentinel
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
 
-      - id: version
+      - name: Extract version
+        id: version
         run: |
-          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "0.$(date +%d%m%Y)")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "dev_$(date +%d%m%Y)")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-  build-ipk:
-    name: Build ipk sentinel and luci-app-sentinel
-    runs-on: ubuntu-latest
-    needs: preparation
-
-    steps:
-      - uses: actions/checkout@v5.0.0
+      - name: Build and push
+        uses: docker/build-push-action@v6.9.0
         with:
-          fetch-depth: 0
-
-      - name: Build ipk
-        uses: docker/build-push-action@v6.18.0
-        with:
-          file: ./Dockerfile-ipk
           context: .
-          tags: sentinel:ci-ipk
+          tags: sentinel:ci
           build-args: |
-            sentinel_VERSION=${{ needs.preparation.outputs.version }}
+            PKG_VERSION=${{ steps.version.outputs.version }}
 
-      - name: Create ipk Docker container
-        run: docker create --name ipk sentinel:ci-ipk
+      - name: Create Docker container
+        run: docker create --name sentinel sentinel:ci
 
-      - name: Copy files from ipk Docker container
+      - name: Copy file from Docker container
         run: |
-          mkdir -p ./bin/ipk
-          docker cp ipk:/builder/bin/packages/x86_64/utilities/. ./bin/ipk/
-          docker cp ipk:/builder/bin/packages/x86_64/luci/. ./bin/ipk/
+          docker cp sentinel:/builder/bin/packages/x86_64/utilites/. ./bin/
+          docker cp sentinel:/builder/bin/packages/x86_64/luci/. ./bin/
 
-      - name: Fix ipk naming (_ → -)
-        shell: bash
+      - name: Filter IPK files
         run: |
-          for f in ./bin/ipk/*.ipk; do
-            [ -e "$f" ] || continue
-            base=$(basename "$f")
-            newname=$(echo "$base" | sed 's/_/-/g')
-            mv "$f" "./bin/ipk/$newname"
-          done
+          # Извлекаем версию из тега, убирая префикс 'v'
+          VERSION=${GITHUB_REF#refs/tags/v}
 
-      - name: Filter files
-        shell: bash
-        run: |
-          VERSION="${{ needs.preparation.outputs.version }}"
-          mkdir -p ./filtered-bin/ipk
-
-          cp ./bin/ipk/sentinel-*.ipk ./filtered-bin/ipk/
-          cp ./bin/ipk/luci-app-sentinel-*.ipk ./filtered-bin/ipk/
-          cp ./bin/ipk/luci-i18n-sentinel-ru-*.ipk ./filtered-bin/ipk/luci-i18n-sentinel-ru-${VERSION}.ipk
+          mkdir -p ./filtered-bin
+          cp ./bin/luci-i18n-sentinel-ru_*.ipk "./filtered-bin/luci-i18n-sentinel-ru_${VERSION}.ipk"
+          cp ./bin/sentinel_*.ipk ./filtered-bin/
+          cp ./bin/luci-app-sentinel_*.ipk ./filtered-bin/
 
       - name: Remove Docker container
-        run: docker rm ipk
+        run: docker rm sentinel
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
+      - name: Release
+        uses: softprops/action-gh-release@v2.0.8
         with:
-          name: release-files-${{ github.ref_name }}-ipk
-          path: ./filtered-bin/ipk/*.ipk
-          retention-days: 1
-          if-no-files-found: error
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: build-ipk
-
-    steps:
-      - uses: actions/checkout@v5.0.0
-
-      - name: Create release dir
-        run: mkdir -p ./filtered-bin/release
-
-      - name: Download ipk artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: release-files-${{ github.ref_name }}-ipk
-          path: ./filtered-bin/release
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.4.0
-        with:
-          files: ./filtered-bin/release/*.ipk
-          draft: false
-          prerelease: false
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+          files: ./filtered-bin/*.ipk

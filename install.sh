@@ -1,13 +1,8 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 REPO="https://api.github.com/repos/sentiox/sentinel/releases/latest"
 DOWNLOAD_DIR="/tmp/sentinel"
 COUNT=3
-
-# Cached flag to switch between ipk or apk package managers
-PKG_IS_APK=0
-command -v apk >/dev/null 2>&1 && PKG_IS_APK=1
 
 rm -rf "$DOWNLOAD_DIR"
 mkdir -p "$DOWNLOAD_DIR"
@@ -16,184 +11,82 @@ msg() {
     printf "\033[32;1m%s\033[0m\n" "$1"
 }
 
-pkg_is_installed () {
-    local pkg_name="$1"
-
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        # grep -q should work without change based on example from documentation
-        # apk list --installed --providers dnsmasq
-        # <dnsmasq> dnsmasq-full-2.90-r3 x86_64 {feeds/base/package/network/services/dnsmasq} (GPL-2.0) [installed]
-        apk list --installed | grep -q "$pkg_name"
-    else
-        opkg list-installed | grep -q "$pkg_name"
-    fi
-}
-
-pkg_remove() {
-    local pkg_name="$1"
-
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        # TODO: check --force-depends flag
-        # Nothing here: https://openwrt.org/docs/guide-user/additional-software/opkg-to-apk-cheatsheet
-        apk del "$pkg_name"
-    else
-        opkg remove --force-depends "$pkg_name"
-    fi
-}
-
-pkg_list_update() {
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        apk update
-    else
-        opkg update
-    fi
-}
-
-pkg_install() {
-    local pkg_file="$1"
-
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        # Can't install without flag based on info from documentation
-        # If you're installing a non-standard (self-built) package, use the --allow-untrusted option:
-        apk add --allow-untrusted "$pkg_file"
-    else
-        opkg install "$pkg_file"
-    fi
-}
-
-update_config() {
-    printf "\033[48;5;196m\033[1m╔══════════════════════════════════════════════════════════════════════╗\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ ! Обнаружена старая версия sentinel.                                   ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Если продолжите обновление, вам потребуется настроить sentinel заново. ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Старая конфигурация будет сохранена в /etc/config/sentinel-070         ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Подробности: https://github.com/sentiox/sentinel                     ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Точно хотите продолжить?                                             ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m╚══════════════════════════════════════════════════════════════════════╝\033[0m\n"
-
-    echo ""
-
-    printf "\033[48;5;196m\033[1m╔══════════════════════════════════════════════════════════════════════╗\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ ! Detected old sentinel version.                                       ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ If you continue the update, you will need to RECONFIGURE sentinel.     ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Your old configuration will be saved to /etc/config/sentinel-070       ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Details: https://github.com/sentiox/sentinel                         ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m║ Are you sure you want to continue?                                   ║\033[0m\n"
-    printf "\033[48;5;196m\033[1m╚══════════════════════════════════════════════════════════════════════╝\033[0m\n"
-
-    msg "Continue? (yes/no)"
-
-    while true; do
-            read -r -p '' CONFIG_UPDATE
-            case $CONFIG_UPDATE in
-
-            yes|y|Y)
-                mv /etc/config/sentinel /etc/config/sentinel-070
-                wget -O /etc/config/sentinel https://raw.githubusercontent.com/sentiox/sentinel/refs/heads/main/sentinel/files/etc/config/sentinel
-                msg "sentinel config has been reset to default. Your old config saved in /etc/config/sentinel-070"
-                break
-                ;;
-            *)
-                msg "Exit"
-                exit 1
-                ;;
-        esac
-    done
-}
-
 main() {
     check_system
     sing_box
 
     /usr/sbin/ntpd -q -p 194.190.168.1 -p 216.239.35.0 -p 216.239.35.4 -p 162.159.200.1 -p 162.159.200.123
 
-    pkg_list_update || { echo "Packages list update failed"; exit 1; }
-
+    opkg update || { echo "opkg update failed"; exit 1; }
+  
     if [ -f "/etc/init.d/sentinel" ]; then
-        msg "sentinel is already installed. Upgrading..."
+        msg "sentinel is already installed. Upgraded..."
     else
-        msg "Installing sentinel..."
+        msg "Installed sentinel..."
     fi
-
-    if command -v curl >/dev/null 2>&1; then
+    
+    if command -v curl &> /dev/null; then
         check_response=$(curl -s "https://api.github.com/repos/sentiox/sentinel/releases/latest")
 
         if echo "$check_response" | grep -q 'API rate limit '; then
-            msg "You've reached the GitHub rate limit. Repeat in five minutes."
+            msg "You've reached rate limit from GitHub. Repeat in five minutes."
             exit 1
         fi
     fi
 
-    local grep_url_pattern
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        grep_url_pattern='https://[^"[:space:]]*\.apk'
-    else
-        grep_url_pattern='https://[^"[:space:]]*\.ipk'
-    fi
-
-    wget -qO- "$REPO" | grep -o "$grep_url_pattern" | while read -r url; do
+    download_success=0
+    while read -r url; do
         filename=$(basename "$url")
         filepath="$DOWNLOAD_DIR/$filename"
-
+               
         attempt=0
         while [ $attempt -lt $COUNT ]; do
             msg "Download $filename (count $((attempt+1)))..."
             if wget -q -O "$filepath" "$url"; then
                 if [ -s "$filepath" ]; then
                     msg "$filename successfully downloaded"
+                    download_success=1
                     break
                 fi
             fi
-            msg "Download error for $filename. Retrying..."
+            msg "Download error $filename. Retry..."
             rm -f "$filepath"
             attempt=$((attempt+1))
         done
-
+        
         if [ $attempt -eq $COUNT ]; then
             msg "Failed to download $filename after $COUNT attempts"
         fi
-    done
-
-    # Check if any files were downloaded
-    if ! ls "$DOWNLOAD_DIR"/*sentinel* >/dev/null 2>&1; then
+    done < <(wget -qO- "$REPO" | grep -o 'https://[^"[:space:]]*\.ipk')
+    
+    if [ $download_success -eq 0 ]; then
         msg "No packages were downloaded successfully"
         exit 1
     fi
-
+    
     for pkg in sentinel luci-app-sentinel; do
-        file=""
-        for f in "$DOWNLOAD_DIR"/"$pkg"*; do
-            if [ -f "$f" ]; then
-                file=$(basename "$f")
-                break
-            fi
-        done
+        file=$(ls "$DOWNLOAD_DIR" | grep "^$pkg" | head -n 1)
         if [ -n "$file" ]; then
-            msg "Installing $file..."
-            pkg_install "$DOWNLOAD_DIR/$file"
+            msg "Installing $file"
+            opkg install "$DOWNLOAD_DIR/$file"
             sleep 3
         fi
     done
 
-    ru=""
-    for f in "$DOWNLOAD_DIR"/luci-i18n-sentinel-ru*; do
-        if [ -f "$f" ]; then
-            ru=$(basename "$f")
-            break
-        fi
-    done
+    ru=$(ls "$DOWNLOAD_DIR" | grep "luci-i18n-sentinel-ru" | head -n 1)
     if [ -n "$ru" ]; then
-        if pkg_is_installed luci-i18n-sentinel-ru; then
-                msg "Upgrading Russian translation..."
-                pkg_remove luci-i18n-sentinel*
-                pkg_install "$DOWNLOAD_DIR/$ru"
+        if opkg list-installed | grep -q luci-i18n-sentinel-ru; then
+                msg "Upgraded ru translation..."
+                opkg remove luci-i18n-sentinel*
+                opkg install "$DOWNLOAD_DIR/$ru"
         else
-            msg "Русский язык интерфейса ставим? y/n (Install the Russian interface language?)"
+            msg "Русский язык интерфейса ставим? y/n (Need a Russian translation?)"
             while true; do
                 read -r -p '' RUS
                 case $RUS in
                 y)
-                    pkg_remove luci-i18n-sentinel*
-                    pkg_install "$DOWNLOAD_DIR/$ru"
+                    opkg remove luci-i18n-sentinel*
+                    opkg install "$DOWNLOAD_DIR/$ru"
                     break
                     ;;
                 n)
@@ -236,50 +129,19 @@ check_system() {
     fi
 
     if ! nslookup google.com >/dev/null 2>&1; then
-        msg "DNS is not working."
+        msg "DNS not working"
         exit 1
     fi
 
-    # Check version
-    if command -v sentinel > /dev/null 2>&1; then
-        local version
-        version=$(/usr/bin/sentinel show_version 2> /dev/null)
-        if [ -n "$version" ]; then
-            version=$(echo "$version" | sed 's/^v//')
-            local major
-            local minor
-            local patch
-            major=$(echo "$version" | cut -d. -f1)
-            minor=$(echo "$version" | cut -d. -f2)
-            patch=$(echo "$version" | cut -d. -f3)
-
-            # Compare version: must be >= 0.7.0
-            if [ "$major" -gt 0 ] ||
-                [ "$major" -eq 0 ] && [ "$minor" -gt 7 ] ||
-                [ "$major" -eq 0 ] && [ "$minor" -eq 7 ] && [ "$patch" -ge 0 ]; then
-                msg "sentinel version >= 0.7.0"
-                break
-            else
-                msg "sentinel version < 0.7.0"
-                update_config
-            fi
-        else
-            msg "Unknown sentinel version"
-            update_config
-        fi
-    fi
-
-    if pkg_is_installed https-dns-proxy; then
-        msg "Conflicting package detected: https-dns-proxy. Remove?"
+    if opkg list-installed | grep -q https-dns-proxy; then
+        msg "Сonflicting package detected: https-dns-proxy. Remove?"
 
         while true; do
                 read -r -p '' DNSPROXY
                 case $DNSPROXY in
 
-                yes|y|Y)
-                    pkg_remove luci-app-https-dns-proxy
-                    pkg_remove https-dns-proxy
-                    pkg_remove luci-i18n-https-dns-proxy*
+                yes|y|Y|yes)
+                    opkg remove --force-depends luci-app-https-dns-proxy https-dns-proxy luci-i18n-https-dns-proxy*
                     break
                     ;;
                 *)
@@ -292,18 +154,18 @@ check_system() {
 }
 
 sing_box() {
-    if ! pkg_is_installed "^sing-box"; then
+    if ! opkg list-installed | grep -q "^sing-box"; then
         return
     fi
 
     sing_box_version=$(sing-box version | head -n 1 | awk '{print $3}')
     required_version="1.12.4"
 
-    if [ "$(printf '%s\n%s\n' "$sing_box_version" "$required_version" | sort -V | head -n 1)" != "$required_version" ]; then
-        msg "sing-box version $sing_box_version is older than the required version $required_version."
+    if [ "$(echo -e "$sing_box_version\n$required_version" | sort -V | head -n 1)" != "$required_version" ]; then
+        msg "sing-box version $sing_box_version is older than required $required_version"
         msg "Removing old version..."
         service sentinel stop
-        pkg_remove sing-box
+        opkg remove sing-box --force-depends
     fi
 }
 
