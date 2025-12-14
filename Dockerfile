@@ -7,5 +7,5 @@ COPY ./sentinel /builder/package/feeds/utilites/sentinel
 COPY ./luci-app-sentinel /builder/package/feeds/luci/luci-app-sentinel
 
 RUN make defconfig && \
-    make package/sentinel/compile && \
+    make package/sentinel/compile V=s -j1 && \
     make package/luci-app-sentinel/compile V=s -j4
