@@ -3,14 +3,19 @@ FROM openwrt/sdk:x86-64-24.10.1
 ARG PKG_VERSION
 ENV PKG_VERSION=${PKG_VERSION}
 
-# Обновляем feeds (luci уже есть в SDK, но обновим)
-RUN ./scripts/feeds update -a && ./scripts/feeds install -a
+# 1. Обновляем и ставим feeds (ОБЯЗАТЕЛЬНО)
+RUN ./scripts/feeds update -a && \
+    ./scripts/feeds install -a
 
-# Копируем пакеты В ПРАВИЛЬНЫЙ FEED
+# 2. Копируем пакеты В ПРАВИЛЬНЫЕ FEEDS
+# utilities — для обычных пакетов
+# luci — ТОЛЬКО для luci-app
 COPY ./sentinel /builder/package/feeds/utilities/sentinel
 COPY ./luci-app-sentinel /builder/package/feeds/luci/luci-app-sentinel
 
-# Сборка
+# 3. Сборка (ОДНОПОТОЧНО + полный лог)
 RUN make defconfig && \
-    make package/sentinel/compile -j$(nproc) V=s && \
-    make package/luci-app-sentinel/compile -j$(nproc) V=s
+    echo "=== BUILD sentinel ===" && \
+    make package/sentinel/compile -j1 V=s && \
+    echo "=== BUILD luci-app-sentinel ===" && \
+    make package/luci-app-sentinel/compile -j1 V=s
