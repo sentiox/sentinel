@@ -283,7 +283,7 @@ function createConfigSection(section, map, network) {
     o.rmempty = false;
     o.ucisection = s.section;
 
-    o = s.taboption('basic', form.DynamicList, 'community_lists', _('Service List'), _('Select predefined service for routing') + ' <a href="https://github.com/itdoginfo/allow-domains" target="_blank">github.com/itdoginfo/allow-domains</a>');
+    o = s.taboption('basic', form.DynamicList, 'community_lists', _('Service List'), _('Select predefined service for routing') + ' <a href="https://github.com/sentiox/allow-domains" target="_blank">github.com/sentiox/allow-domains</a>');
     o.placeholder = 'Service list';
     Object.entries(constants.DOMAIN_LIST_OPTIONS).forEach(([key, label]) => {
         o.value(key, _(label));
