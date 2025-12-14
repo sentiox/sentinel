@@ -5,6 +5,6 @@ rm -f /tmp/luci-indexcache*
 
 [ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd reload
 
-logger -t "podkop" "$timestamp uci-defaults script executed"
+logger -t "sentinel" "$timestamp uci-defaults script executed"
 
 exit 0
