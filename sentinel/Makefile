@@ -1,6 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sentinel
+PKG_VERSION:=1.0
 PKG_RELEASE:=1
 PKGARCH:=all
 
@@ -22,6 +23,9 @@ define Package/sentinel/description
 Domain routing. Use of VLESS, Shadowsocks technologies
 endef
 
+# ⛔ НЕТ Build/Configure
+# ⛔ НЕТ Build/Compile
+
 define Package/sentinel/prerm
 #!/bin/sh
 
@@ -40,7 +44,6 @@ endef
 define Package/sentinel/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/etc/init.d/sentinel $(1)/etc/init.d/sentinel
-	sed -i "s/VERSION_FROM_MAKEFILE/$(PKG_VERSION)/g" $(1)/etc/init.d/sentinel
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/etc/config/sentinel $(1)/etc/config/sentinel
