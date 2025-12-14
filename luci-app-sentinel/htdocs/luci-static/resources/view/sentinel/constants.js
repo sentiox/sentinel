@@ -7,8 +7,8 @@ const STATUS_COLORS = {
     WARNING: '#ff9800'
 };
 
-const FAKEIP_CHECK_DOMAIN = 'fakeip.sentinel.fyi';
-const IP_CHECK_DOMAIN = 'ip.sentinel.fyi';
+const FAKEIP_CHECK_DOMAIN = 'fakeip.podkop.fyi';
+const IP_CHECK_DOMAIN = 'ip.podkop.fyi';
 
 const REGIONAL_OPTIONS = ['russia_inside', 'russia_outside', 'ukraine_inside'];
 const ALLOWED_WITH_RUSSIA_INSIDE = [
