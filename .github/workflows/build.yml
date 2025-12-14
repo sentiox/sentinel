@@ -1,5 +1,8 @@
 name: Build sentinel and luci-app-sentinel
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
