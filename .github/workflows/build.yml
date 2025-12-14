@@ -1,54 +1,59 @@
-name: Build packages
+name: Build sentinel and luci-app-sentinel
+
 on:
   push:
     tags:
-      - v*
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build podkop and luci-app-podkop
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4.2.1
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Extract version
-        id: version
-        run: |
-          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "dev_$(date +%d%m%Y)")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Set VERSION
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
-      - name: Build and push
-        uses: docker/build-push-action@v6.9.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build OpenWrt packages
+        uses: docker/build-push-action@v6
         with:
           context: .
-          tags: podkop:ci
+          load: true
+          tags: sentinel:ci
           build-args: |
-            PKG_VERSION=${{ steps.version.outputs.version }}
+            PKG_VERSION=${{ env.VERSION }}
 
       - name: Create Docker container
-        run: docker create --name podkop podkop:ci
+        run: docker create --name sentinel sentinel:ci
 
-      - name: Copy file from Docker container
+      - name: Copy build artifacts
         run: |
-          docker cp podkop:/builder/bin/packages/x86_64/utilites/. ./bin/
-          docker cp podkop:/builder/bin/packages/x86_64/luci/. ./bin/
+          mkdir -p bin filtered-bin
+          docker cp sentinel:/builder/bin/packages/x86_64/utilites/. ./bin/
+          docker cp sentinel:/builder/bin/packages/x86_64/luci/. ./bin/
 
-      - name: Filter IPK files
-        run: |
-          # Извлекаем версию из тега, убирая префикс 'v'
-          VERSION=${GITHUB_REF#refs/tags/v}
-
-          mkdir -p ./filtered-bin
-          cp ./bin/luci-i18n-podkop-ru_*.ipk "./filtered-bin/luci-i18n-podkop-ru_${VERSION}.ipk"
-          cp ./bin/podkop_*.ipk ./filtered-bin/
-          cp ./bin/luci-app-podkop_*.ipk ./filtered-bin/
+          cp ./bin/sentinel_*.ipk ./filtered-bin/
+          cp ./bin/luci-app-sentinel_*.ipk ./filtered-bin/
+          cp ./bin/luci-i18n-sentinel-ru_*.ipk ./filtered-bin/ || true
 
       - name: Remove Docker container
-        run: docker rm podkop
+        run: docker rm sentinel
 
-      - name: Release
-        uses: softprops/action-gh-release@v2.0.8
+      - name: Upload artifacts to workflow
+        uses: actions/upload-artifact@v4
         with:
-          files: ./filtered-bin/*.ipk
+          name: sentinel-ipk-${{ env.VERSION }}
+          path: filtered-bin/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: filtered-bin/*.ipk
