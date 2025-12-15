@@ -14,7 +14,6 @@ const REGIONAL_OPTIONS = ['russia_inside', 'russia_outside', 'ukraine_inside'];
 const ALLOWED_WITH_RUSSIA_INSIDE = [
     'russia_inside',
     'meta',
-	'roblox',
     'twitter',
     'discord',
     'telegram',
