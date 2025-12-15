@@ -1,5 +1,18 @@
 # Sentinel — Domain Routing Service for OpenWrt
 
+## Установка Sentinel
+
+Полная инструкция доступна в документации проекта.
+
+### Кратко
+
+Для установки и обновления используйте один скрипт:
+
+```sh
+sh <(wget -O - https://raw.githubusercontent.com/sentiox/sentinel/main/install.sh)
+```
+
+
 ## Важно перед установкой
 
 - Проект находится в **стадии бета** и активно развивается. Поведение и конфигурация могут меняться от версии к версии.
@@ -52,14 +65,3 @@
 https://github.com/sentiox/sentinel
 
 ---
-
-## Установка Sentinel
-
-Полная инструкция доступна в документации проекта.
-
-### Кратко
-
-Для установки и обновления используйте один скрипт:
-
-```sh
-sh <(wget -O - https://raw.githubusercontent.com/sentiox/sentinel/main/install.sh)
