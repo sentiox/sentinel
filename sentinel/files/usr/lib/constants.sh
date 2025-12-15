@@ -13,7 +13,7 @@ JQ_REQUIRED_VERSION="1.7.1"
 COREUTILS_BASE64_REQUIRED_VERSION="9.7"
 
 ## nft
-NFT_TABLE_NAME="PodkopTable"
+NFT_TABLE_NAME="SenTinelTable"
 NFT_LOCALV4_SET_NAME="localv4"
 NFT_COMMON_SET_NAME="sentinel_subnets"
 NFT_DISCORD_SET_NAME="sentinel_discord_subnets"
@@ -50,19 +50,28 @@ SB_MAIN_OUTBOUND_TAG="main-out"
 SB_REJECT_RULE_TAG="reject-rule-tag"
 
 ## Lists
-GITHUB_RAW_URL="https://raw.githubusercontent.com/itdoginfo/allow-domains/main"
-SRS_MAIN_URL="https://github.com/itdoginfo/allow-domains/releases/latest/download"
+GITHUB_RAW_URL="https://raw.githubusercontent.com/sentiox/allow-domains/main"
+SRS_MAIN_URL="https://github.com/sentiox/allow-domains/releases/latest/download"
+
+# Russia / Ukraine
 DOMAINS_RU_INSIDE="${GITHUB_RAW_URL}/Russia/inside-dnsmasq-nfset.lst"
 DOMAINS_RU_OUTSIDE="${GITHUB_RAW_URL}/Russia/outside-dnsmasq-nfset.lst"
 DOMAINS_UA="${GITHUB_RAW_URL}/Ukraine/inside-dnsmasq-nfset.lst"
+
+# Services (domains)
 DOMAINS_YOUTUBE="${GITHUB_RAW_URL}/Services/youtube.lst"
+DOMAINS_ROBLOX="${GITHUB_RAW_URL}/Services/roblox.lst"
+
+# Subnets (IPv4 only)
 SUBNETS_TWITTER="${GITHUB_RAW_URL}/Subnets/IPv4/twitter.lst"
 SUBNETS_META="${GITHUB_RAW_URL}/Subnets/IPv4/meta.lst"
 SUBNETS_DISCORD="${GITHUB_RAW_URL}/Subnets/IPv4/discord.lst"
-SUBNETS_TELERAM="${GITHUB_RAW_URL}/Subnets/IPv4/telegram.lst"
+SUBNETS_TELEGRAM="${GITHUB_RAW_URL}/Subnets/IPv4/telegram.lst"
 SUBNETS_CLOUDFLARE="${GITHUB_RAW_URL}/Subnets/IPv4/cloudflare.lst"
 SUBNETS_HETZNER="${GITHUB_RAW_URL}/Subnets/IPv4/hetzner.lst"
 SUBNETS_OVH="${GITHUB_RAW_URL}/Subnets/IPv4/ovh.lst"
 SUBNETS_DIGITALOCEAN="${GITHUB_RAW_URL}/Subnets/IPv4/digitalocean.lst"
 SUBNETS_CLOUDFRONT="${GITHUB_RAW_URL}/Subnets/IPv4/cloudfront.lst"
-COMMUNITY_SERVICES="russia_inside russia_outside ukraine_inside geoblock block porn news anime youtube hdrezka tiktok google_ai google_play hodca discord meta twitter cloudflare cloudfront digitalocean hetzner ovh telegram"
+
+# Community services whitelist
+COMMUNITY_SERVICES="russia_inside russia_outside ukraine_inside geoblock block porn news anime youtube hdrezka tiktok google_ai google_play hodca discord meta twitter cloudflare cloudfront digitalocean hetzner ovh telegram roblox"
