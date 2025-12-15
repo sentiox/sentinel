@@ -1216,7 +1216,7 @@ import_community_service_subnet_list_handler() {
     "telegram")
         URL=$SUBNETS_TELERAM
         ;;
-    "telegram")
+    "roblox")
         URL=$SUBNETS_ROBLOX
         ;;
     "cloudflare")
