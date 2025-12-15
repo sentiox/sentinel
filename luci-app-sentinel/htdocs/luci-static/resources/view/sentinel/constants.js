@@ -39,8 +39,6 @@ const DOMAIN_LIST_OPTIONS = {
     youtube: 'Youtube',
     discord: 'Discord',
     meta: 'Meta',
-	roblox: 'Roblox',
-	whatsapp: 'WhatsApp',
     twitter: 'Twitter (X)',
     hdrezka: 'HDRezka',
     tiktok: 'Tik-Tok',
