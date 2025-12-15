@@ -1213,6 +1213,9 @@ import_community_service_subnet_list_handler() {
     "meta")
         URL=$SUBNETS_META
         ;;
+    "roblox")
+        URL=$SUBNETS_ROBLOX
+        ;;
     "telegram")
         URL=$SUBNETS_TELERAM
         ;;
