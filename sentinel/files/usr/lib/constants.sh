@@ -17,7 +17,6 @@ NFT_TABLE_NAME="SenTinelTable"
 NFT_LOCALV4_SET_NAME="localv4"
 NFT_COMMON_SET_NAME="sentinel_subnets"
 NFT_DISCORD_SET_NAME="sentinel_discord_subnets"
-NFT_ROBLOX_SET_NAME="sentinel_roblox_subnets"
 NFT_INTERFACE_SET_NAME="interfaces"
 
 ## sing-box
@@ -61,14 +60,13 @@ DOMAINS_UA="${GITHUB_RAW_URL}/Ukraine/inside-dnsmasq-nfset.lst"
 
 # Services (domains)
 DOMAINS_YOUTUBE="${GITHUB_RAW_URL}/Services/youtube.lst"
-DOMAINS_ROBLOX="${GITHUB_RAW_URL}/Services/roblox.lst"
+DOMAINS_WHATSAPP="${GITHUB_RAW_URL}/Services/whatsapp.lst"
 
 # Subnets (IPv4 only)
 SUBNETS_TWITTER="${GITHUB_RAW_URL}/Subnets/IPv4/twitter.lst"
 SUBNETS_META="${GITHUB_RAW_URL}/Subnets/IPv4/meta.lst"
 SUBNETS_DISCORD="${GITHUB_RAW_URL}/Subnets/IPv4/discord.lst"
 SUBNETS_TELEGRAM="${GITHUB_RAW_URL}/Subnets/IPv4/telegram.lst"
-SUBNETS_ROBLOX="${GITHUB_RAW_URL}/Subnets/IPv4/roblox.lst"
 SUBNETS_CLOUDFLARE="${GITHUB_RAW_URL}/Subnets/IPv4/cloudflare.lst"
 SUBNETS_HETZNER="${GITHUB_RAW_URL}/Subnets/IPv4/hetzner.lst"
 SUBNETS_OVH="${GITHUB_RAW_URL}/Subnets/IPv4/ovh.lst"
@@ -76,4 +74,4 @@ SUBNETS_DIGITALOCEAN="${GITHUB_RAW_URL}/Subnets/IPv4/digitalocean.lst"
 SUBNETS_CLOUDFRONT="${GITHUB_RAW_URL}/Subnets/IPv4/cloudfront.lst"
 
 # Community services whitelist
-COMMUNITY_SERVICES="russia_inside russia_outside ukraine_inside geoblock block porn news anime youtube hdrezka tiktok google_ai google_play hodca discord meta twitter cloudflare cloudfront digitalocean hetzner ovh telegram roblox"
+COMMUNITY_SERVICES="russia_inside russia_outside ukraine_inside geoblock block porn news anime youtube hdrezka tiktok google_ai google_play hodca discord meta twitter cloudflare cloudfront digitalocean hetzner ovh telegram whatsapp"
