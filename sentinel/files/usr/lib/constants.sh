@@ -17,6 +17,7 @@ NFT_TABLE_NAME="SenTinelTable"
 NFT_LOCALV4_SET_NAME="localv4"
 NFT_COMMON_SET_NAME="sentinel_subnets"
 NFT_DISCORD_SET_NAME="sentinel_discord_subnets"
+NFT_ROBLOX_SET_NAME="sentinel_roblox_subnets"
 NFT_INTERFACE_SET_NAME="interfaces"
 
 ## sing-box
