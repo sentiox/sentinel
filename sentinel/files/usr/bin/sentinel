@@ -1205,53 +1205,64 @@ import_community_subnet_lists() {
 
 import_community_service_subnet_list_handler() {
     local service="$1"
+    local URL=""
+    local set_name="$NFT_COMMON_SET_NAME"
 
     case "$service" in
-    "twitter")
+    twitter)
         URL=$SUBNETS_TWITTER
         ;;
-    "meta")
+    meta)
         URL=$SUBNETS_META
         ;;
-    "telegram")
+    telegram)
         URL=$SUBNETS_TELEGRAM
         ;;
-"roblox")
-    URL=$SUBNETS_ROBLOX
-    nft_create_ipv4_set "$NFT_TABLE_NAME" "$NFT_ROBLOX_SET_NAME"
-    nft add rule inet "$NFT_TABLE_NAME" mangle iifname "@$NFT_INTERFACE_SET_NAME" ip daddr \
-        "@$NFT_ROBLOX_SET_NAME" meta mark set 0x105 counter
-    ;;
-    "cloudflare")
+    roblox)
+        URL=$SUBNETS_ROBLOX
+        set_name="$NFT_ROBLOX_SET_NAME"
+
+        nft_create_ipv4_set "$NFT_TABLE_NAME" "$NFT_ROBLOX_SET_NAME"
+        nft add rule inet "$NFT_TABLE_NAME" mangle \
+            iifname "@$NFT_INTERFACE_SET_NAME" ip daddr "@$NFT_ROBLOX_SET_NAME" \
+            meta mark set 0x105 counter
+        ;;
+    cloudflare)
         URL=$SUBNETS_CLOUDFLARE
         ;;
-    "hetzner")
+    hetzner)
         URL=$SUBNETS_HETZNER
         ;;
-    "ovh")
+    ovh)
         URL=$SUBNETS_OVH
         ;;
-    "digitalocean")
+    digitalocean)
         URL=$SUBNETS_DIGITALOCEAN
         ;;
-    "cloudfront")
+    cloudfront)
         URL=$SUBNETS_CLOUDFRONT
         ;;
-    "discord")
+    discord)
         URL=$SUBNETS_DISCORD
+        set_name="$NFT_DISCORD_SET_NAME"
+
         nft_create_ipv4_set "$NFT_TABLE_NAME" "$NFT_DISCORD_SET_NAME"
-        nft add rule inet "$NFT_TABLE_NAME" mangle iifname "@$NFT_INTERFACE_SET_NAME" ip daddr \
-            "@$NFT_DISCORD_SET_NAME" udp dport '{ 50000-65535 }' meta mark set 0x105 counter
+        nft add rule inet "$NFT_TABLE_NAME" mangle \
+            iifname "@$NFT_INTERFACE_SET_NAME" ip daddr "@$NFT_DISCORD_SET_NAME" \
+            udp dport '{ 50000-65535 }' meta mark set 0x105 counter
         ;;
-    *) return 0 ;;
+    *)
+        return 0
+        ;;
     esac
 
-    local tmpfile detour http_proxy_address subnets
+    [ -z "$URL" ] && return 0
+
+    local tmpfile http_proxy_address subnets
     tmpfile=$(mktemp)
     http_proxy_address="$(get_service_proxy_address)"
 
     download_to_file "$URL" "$tmpfile" "$http_proxy_address"
-
     if [ $? -ne 0 ] || [ ! -s "$tmpfile" ]; then
         log "Download $service list failed" "error"
         return 1
@@ -1260,11 +1271,7 @@ import_community_service_subnet_list_handler() {
     subnets="$(parse_domain_or_subnet_file_to_comma_string "$tmpfile" "subnets")"
     rm -f "$tmpfile"
 
-    if [ "$service" = "discord" ]; then
-        nft_add_set_elements "$NFT_TABLE_NAME" "$NFT_DISCORD_SET_NAME" "$subnets"
-    else
-        nft_add_set_elements "$NFT_TABLE_NAME" "$NFT_COMMON_SET_NAME" "$subnets"
-    fi
+    nft_add_set_elements "$NFT_TABLE_NAME" "$set_name" "$subnets"
 }
 
 import_domains_from_remote_domain_lists() {
