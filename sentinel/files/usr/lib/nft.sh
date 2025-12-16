@@ -35,13 +35,23 @@ nft_add_set_elements() {
     nft add element inet "$table" "$set" "{ $elements }" 2>/dev/null
 }
 
+# =========================
 # Chains
+# =========================
 
 nft_create_mangle_chain() {
     local table="$1"
 
     nft add chain inet "$table" mangle \
         '{ type filter hook prerouting priority mangle; policy accept; }' 2>/dev/null
+
+    # 🔥 ROBLOX UDP — BYPASS (КРИТИЧНО)
+    # Roblox gameplay ломается через proxy → сразу return
+    nft insert rule inet "$table" mangle \
+        iifname "@$NFT_INTERFACE_SET_NAME" \
+        ip daddr "@$NFT_COMMON_SET_NAME" \
+        meta l4proto udp \
+        return
 }
 
 nft_create_mangle_output_chain() {
@@ -58,45 +68,23 @@ nft_create_proxy_chain() {
         '{ type filter hook prerouting priority dstnat; policy accept; }' 2>/dev/null
 }
 
-# Common subnets (DEFAULT)
+# =========================
+# Common subnets (TCP ONLY)
+# =========================
 
 nft_add_common_subnet_rules() {
     local table="$1"
 
-    # TCP
+    # TCP → proxy
     nft add rule inet "$table" mangle \
         iifname "@$NFT_INTERFACE_SET_NAME" \
         ip daddr "@$NFT_COMMON_SET_NAME" \
         meta l4proto tcp meta mark set 0x105 counter 2>/dev/null
-
-    # UDP
-    nft add rule inet "$table" mangle \
-        iifname "@$NFT_INTERFACE_SET_NAME" \
-        ip daddr "@$NFT_COMMON_SET_NAME" \
-        meta l4proto udp meta mark set 0x105 counter 2>/dev/null
 }
 
-# Roblox (FIXED)
-
-nft_add_roblox_rules() {
-    local table="$1"
-
-    nft_create_ipv4_set "$table" "$NFT_ROBLOX_SET_NAME"
-
-    # TCP (launcher / auth)
-    nft add rule inet "$table" mangle \
-        iifname "@$NFT_INTERFACE_SET_NAME" \
-        ip daddr "@$NFT_ROBLOX_SET_NAME" \
-        meta l4proto tcp meta mark set 0x105 counter 2>/dev/null
-
-    # UDP (GAMEPLAY — КРИТИЧНО)
-    nft add rule inet "$table" mangle \
-        iifname "@$NFT_INTERFACE_SET_NAME" \
-        ip daddr "@$NFT_ROBLOX_SET_NAME" \
-        meta l4proto udp meta mark set 0x105 counter 2>/dev/null
-}
-
-# Discord 
+# =========================
+# Discord
+# =========================
 
 nft_add_discord_rules() {
     local table="$1"
@@ -106,6 +94,6 @@ nft_add_discord_rules() {
     nft add rule inet "$table" mangle \
         iifname "@$NFT_INTERFACE_SET_NAME" \
         ip daddr "@$NFT_DISCORD_SET_NAME" \
-        udp dport '{ 50000-65535 }' \
+        udp dport 50000-65535 \
         meta mark set 0x105 counter 2>/dev/null
 }
