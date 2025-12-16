@@ -1219,30 +1219,6 @@ import_community_service_subnet_list_handler() {
         ;;
     roblox)
         URL="$SUBNETS_ROBLOX"
-
-        nft_create_ipv4_set "$NFT_TABLE_NAME" "$NFT_ROBLOX_SET_NAME"
-
-        # PREROUTING — TCP
-        nft add rule inet "$NFT_TABLE_NAME" mangle \
-            iifname "@$NFT_INTERFACE_SET_NAME" \
-            ip daddr "@$NFT_ROBLOX_SET_NAME" \
-            meta l4proto tcp meta mark set 0x105 counter 2>/dev/null
-
-        # PREROUTING — UDP (КРИТИЧНО)
-        nft add rule inet "$NFT_TABLE_NAME" mangle \
-            iifname "@$NFT_INTERFACE_SET_NAME" \
-            ip daddr "@$NFT_ROBLOX_SET_NAME" \
-            meta l4proto udp meta mark set 0x105 counter 2>/dev/null
-
-        # OUTPUT — TCP
-        nft add rule inet "$NFT_TABLE_NAME" mangle_output \
-            ip daddr "@$NFT_ROBLOX_SET_NAME" \
-            meta l4proto tcp meta mark set 0x105 counter 2>/dev/null
-
-        # OUTPUT — UDP
-        nft add rule inet "$NFT_TABLE_NAME" mangle_output \
-            ip daddr "@$NFT_ROBLOX_SET_NAME" \
-            meta l4proto udp meta mark set 0x105 counter 2>/dev/null
         ;;
     cloudflare)
         URL="$SUBNETS_CLOUDFLARE"
@@ -1293,8 +1269,6 @@ import_community_service_subnet_list_handler() {
 
     if [ "$service" = "discord" ]; then
         nft_add_set_elements "$NFT_TABLE_NAME" "$NFT_DISCORD_SET_NAME" "$subnets"
-    elif [ "$service" = "roblox" ]; then
-        nft_add_set_elements "$NFT_TABLE_NAME" "$NFT_ROBLOX_SET_NAME" "$subnets"
     else
         nft_add_set_elements "$NFT_TABLE_NAME" "$NFT_COMMON_SET_NAME" "$subnets"
     fi
