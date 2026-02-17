@@ -80,6 +80,8 @@ export const SentinelShellMethods = {
     callBaseMethod<unknown>(Sentinel.AvailableMethods.SHOW_SING_BOX_CONFIG),
   checkLogs: async () =>
     callBaseMethod<unknown>(Sentinel.AvailableMethods.CHECK_LOGS),
+  clearLogs: async () =>
+    callBaseMethod<unknown>(Sentinel.AvailableMethods.CLEAR_LOGS),
   getSystemInfo: async () =>
     callBaseMethod<Sentinel.GetSystemInfo>(
       Sentinel.AvailableMethods.GET_SYSTEM_INFO,

@@ -8,6 +8,7 @@ import {
   renderPlayIcon24,
   renderRotateCcwIcon24,
   renderSquareChartGanttIcon24,
+  renderXIcon24,
 } from '../../../../icons';
 import { insertIf } from '../../../../helpers';
 
@@ -27,6 +28,7 @@ interface IRenderAvailableActionsProps {
   globalCheck: ActionProps;
   viewLogs: ActionProps;
   showSingBoxConfig: ActionProps;
+  clearLogs: ActionProps;
 }
 
 export function renderAvailableActions({
@@ -38,6 +40,7 @@ export function renderAvailableActions({
   globalCheck,
   viewLogs,
   showSingBoxConfig,
+  clearLogs,
 }: IRenderAvailableActionsProps) {
   return E('div', { class: 'pdk_diagnostic-page__right-bar__actions' }, [
     E('b', {}, _('Available actions')),
@@ -116,6 +119,16 @@ export function renderAvailableActions({
         text: _('Show sing-box config'),
         loading: showSingBoxConfig.loading,
         disabled: showSingBoxConfig.disabled,
+      }),
+    ]),
+    ...insertIf(clearLogs.visible, [
+      renderButton({
+        classNames: ['cbi-button-reset'],
+        onClick: clearLogs.onClick,
+        icon: renderXIcon24,
+        text: _('Clear old logs'),
+        loading: clearLogs.loading,
+        disabled: clearLogs.disabled,
       }),
     ]),
   ]);

@@ -314,6 +314,39 @@ async function handleShowSingBoxConfig() {
   }
 }
 
+async function handleClearLogs() {
+  const diagnosticsActions = store.get().diagnosticsActions;
+  store.set({
+    diagnosticsActions: {
+      ...diagnosticsActions,
+      clearLogs: { loading: true },
+    },
+  });
+
+  try {
+    const clearLogs = await SentinelShellMethods.clearLogs();
+
+    if (clearLogs.success) {
+      showToast(_('Logs cleared successfully! Refresh the page.'), 'success');
+      // Refresh page after 2 seconds to show clean state
+      setTimeout(() => window.location.reload(), 2000);
+    } else {
+      logger.error('[DIAGNOSTIC]', 'handleClearLogs - e', clearLogs);
+      showToast(_('Failed to clear logs!'), 'error');
+    }
+  } catch (e) {
+    logger.error('[DIAGNOSTIC]', 'handleClearLogs - e', e);
+    showToast(_('Failed to clear logs!'), 'error');
+  } finally {
+    store.set({
+      diagnosticsActions: {
+        ...diagnosticsActions,
+        clearLogs: { loading: false },
+      },
+    });
+  }
+}
+
 function renderWikiDisclaimerWidget() {
   const diagnosticsChecks = store.get().diagnosticsChecks;
 
@@ -400,6 +433,12 @@ function renderDiagnosticAvailableActionsWidget() {
       loading: diagnosticsActions.showSingBoxConfig.loading,
       visible: true,
       onClick: handleShowSingBoxConfig,
+      disabled: atLeastOneServiceCommandLoading,
+    },
+    clearLogs: {
+      loading: diagnosticsActions.clearLogs.loading,
+      visible: true,
+      onClick: handleClearLogs,
       disabled: atLeastOneServiceCommandLoading,
     },
   });

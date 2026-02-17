@@ -796,3 +796,12 @@ msgstr "URL вашей подписки. Содержимое будет авт�
 
 msgid "Update subscription"
 msgstr "Обновить подписку"
+
+msgid "Clear old logs"
+msgstr "Очистить старые логи"
+
+msgid "Logs cleared successfully! Refresh the page."
+msgstr "Логи успешно очищены! Обновите страницу."
+
+msgid "Failed to clear logs!"
+msgstr "Не удалось очистить логи!"

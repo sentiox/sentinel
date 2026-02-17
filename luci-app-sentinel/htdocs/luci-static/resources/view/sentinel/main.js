@@ -611,6 +611,7 @@ var Sentinel;
     AvailableMethods2["GLOBAL_CHECK"] = "global_check";
     AvailableMethods2["SHOW_SING_BOX_CONFIG"] = "show_sing_box_config";
     AvailableMethods2["CHECK_LOGS"] = "check_logs";
+    AvailableMethods2["CLEAR_LOGS"] = "clear_logs";
     AvailableMethods2["GET_SYSTEM_INFO"] = "get_system_info";
     AvailableMethods2["SUBSCRIPTION_UPDATE"] = "subscription_update";
   })(AvailableMethods = Sentinel2.AvailableMethods || (Sentinel2.AvailableMethods = {}));
@@ -688,6 +689,7 @@ var SentinelShellMethods = {
   globalCheck: async () => callBaseMethod(Sentinel.AvailableMethods.GLOBAL_CHECK),
   showSingBoxConfig: async () => callBaseMethod(Sentinel.AvailableMethods.SHOW_SING_BOX_CONFIG),
   checkLogs: async () => callBaseMethod(Sentinel.AvailableMethods.CHECK_LOGS),
+  clearLogs: async () => callBaseMethod(Sentinel.AvailableMethods.CLEAR_LOGS),
   getSystemInfo: async () => callBaseMethod(
     Sentinel.AvailableMethods.GET_SYSTEM_INFO
   )
@@ -1224,6 +1226,9 @@ var initialDiagnosticStore = {
       loading: false
     },
     showSingBoxConfig: {
+      loading: false
+    },
+    clearLogs: {
       loading: false
     }
   },
@@ -3588,7 +3593,8 @@ function renderAvailableActions({
   disable,
   globalCheck,
   viewLogs,
-  showSingBoxConfig
+  showSingBoxConfig,
+  clearLogs
 }) {
   return E("div", { class: "pdk_diagnostic-page__right-bar__actions" }, [
     E("b", {}, _("Available actions")),
@@ -3667,6 +3673,16 @@ function renderAvailableActions({
         text: _("Show sing-box config"),
         loading: showSingBoxConfig.loading,
         disabled: showSingBoxConfig.disabled
+      })
+    ]),
+    ...insertIf(clearLogs.visible, [
+      renderButton({
+        classNames: ["cbi-button-reset"],
+        onClick: clearLogs.onClick,
+        icon: renderXIcon24,
+        text: _("Clear old logs"),
+        loading: clearLogs.loading,
+        disabled: clearLogs.disabled
       })
     ])
   ]);
@@ -4282,6 +4298,35 @@ async function handleShowSingBoxConfig() {
     });
   }
 }
+async function handleClearLogs() {
+  const diagnosticsActions = store.get().diagnosticsActions;
+  store.set({
+    diagnosticsActions: {
+      ...diagnosticsActions,
+      clearLogs: { loading: true }
+    }
+  });
+  try {
+    const clearLogs = await SentinelShellMethods.clearLogs();
+    if (clearLogs.success) {
+      showToast(_("Logs cleared successfully! Refresh the page."), "success");
+      setTimeout(() => window.location.reload(), 2000);
+    } else {
+      logger.error("[DIAGNOSTIC]", "handleClearLogs - e", clearLogs);
+      showToast(_("Failed to clear logs!"), "error");
+    }
+  } catch (e) {
+    logger.error("[DIAGNOSTIC]", "handleClearLogs - e", e);
+    showToast(_("Failed to clear logs!"), "error");
+  } finally {
+    store.set({
+      diagnosticsActions: {
+        ...diagnosticsActions,
+        clearLogs: { loading: false }
+      }
+    });
+  }
+}
 function renderWikiDisclaimerWidget() {
   const diagnosticsChecks = store.get().diagnosticsChecks;
   function getWikiKind() {
@@ -4354,6 +4399,12 @@ function renderDiagnosticAvailableActionsWidget() {
       loading: diagnosticsActions.showSingBoxConfig.loading,
       visible: true,
       onClick: handleShowSingBoxConfig,
+      disabled: atLeastOneServiceCommandLoading
+    },
+    clearLogs: {
+      loading: diagnosticsActions.clearLogs.loading,
+      visible: true,
+      onClick: handleClearLogs,
       disabled: atLeastOneServiceCommandLoading
     }
   });

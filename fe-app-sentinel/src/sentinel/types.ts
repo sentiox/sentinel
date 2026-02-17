@@ -35,6 +35,7 @@ export namespace Sentinel {
   // check_nft_rules         Check NFT rules status
   // check_sing_box          Check sing-box installation and status
   // check_logs              Show sentinel logs from system journal
+  // clear_logs              Clear old log entries and restart log daemon
   // check_sing_box_logs     Show sing-box logs
   // check_fakeip            Test FakeIP on router
   // clash_api               Clash API interface for managing proxies and groups
@@ -64,6 +65,7 @@ export namespace Sentinel {
     GLOBAL_CHECK = 'global_check',
     SHOW_SING_BOX_CONFIG = 'show_sing_box_config',
     CHECK_LOGS = 'check_logs',
+    CLEAR_LOGS = 'clear_logs',
     GET_SYSTEM_INFO = 'get_system_info',
   }
 

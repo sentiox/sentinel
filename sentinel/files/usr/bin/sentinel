@@ -3218,6 +3218,12 @@ check_dns_available)
 global_check)
     global_check "${2:-}"
     ;;
+clear_logs)
+    log "Clearing old log entries..." "info"
+    /etc/init.d/log restart
+    log "✅ Logs cleared successfully! Old notifications will no longer appear." "info"
+    echo "OK"
+    ;;
 *)
     show_help
     exit 1
