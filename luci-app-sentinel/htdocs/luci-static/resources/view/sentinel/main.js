@@ -3904,14 +3904,14 @@ function renderWikiDisclaimer(kind) {
       iconWrap,
       E("div", { class: "pdk_diagnostic-page__right-bar__wiki__texts" }, [
         E("b", {}, _("Troubleshooting")),
-        E("div", {}, _("Do not panic, everything can be fixed, just..."))
+        E("div", {}, _("Internet not working? Contact support"))
       ])
     ]),
     renderButton({
       classNames: ["cbi-button-save"],
-      text: _("Visit Wiki"),
+      text: _("Support"),
       onClick: () => window.open(
-        "https://podkop.net/docs/troubleshooting/?utm_source=sentinel",
+        "https://t.me/MBzeGuardHelpBot",
         "_blank",
         "noopener,noreferrer"
       )
@@ -4368,39 +4368,12 @@ function renderDiagnosticSystemInfoWidget() {
   function getSentinelVersionRow() {
     const loading = diagnosticsSystemInfo.loading;
     const unknown = diagnosticsSystemInfo.sentinel_version === _("unknown");
-    const hasActualVersion = Boolean(diagnosticsSystemInfo.sentinel_latest_version) && diagnosticsSystemInfo.sentinel_latest_version !== "unknown";
     const version = normalizeCompiledVersion(
       diagnosticsSystemInfo.sentinel_version
     );
-    const isDevVersion = version === "dev";
-    if (loading || unknown || !hasActualVersion || isDevVersion) {
-      return {
-        key: "Sentinel",
-        value: version
-      };
-    }
-    if (version !== `v${diagnosticsSystemInfo.sentinel_latest_version}`) {
-      logger.debug(
-        "[DIAGNOSTIC]",
-        "diagnosticsSystemInfo",
-        diagnosticsSystemInfo
-      );
-      return {
-        key: "Sentinel",
-        value: version,
-        tag: {
-          label: _("Outdated"),
-          kind: "warning"
-        }
-      };
-    }
     return {
-      key: "Sentinel",
-      value: version,
-      tag: {
-        label: _("Latest"),
-        kind: "success"
-      }
+      key: "MBzeGuard",
+      value: version
     };
   }
   const renderedSystemInfo = renderSystemInfo({

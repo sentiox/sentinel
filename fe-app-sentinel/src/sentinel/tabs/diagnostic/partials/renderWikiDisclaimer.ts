@@ -23,7 +23,7 @@ export function renderWikiDisclaimer(kind: 'default' | 'error' | 'warning') {
       iconWrap,
       E('div', { class: 'pdk_diagnostic-page__right-bar__wiki__texts' }, [
         E('b', {}, _('Troubleshooting')),
-        E('div', {}, _('Do not panic, everything can be fixed, just...')),
+        E('div', {}, _('Internet not working? Contact support')),
       ]),
     ]),
     renderButton({

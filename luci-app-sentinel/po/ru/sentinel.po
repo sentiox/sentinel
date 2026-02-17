@@ -164,8 +164,8 @@ msgstr "DNS-сервер"
 msgid "DNS server address cannot be empty"
 msgstr "Адрес DNS-сервера не может быть пустым"
 
-msgid "Do not panic, everything can be fixed, just..."
-msgstr "Не паникуйте, всё можно исправить, просто..."
+msgid "Internet not working? Contact support"
+msgstr "Не работает интернет? Обратитесь в поддержку"
 
 msgid "Domain Resolver"
 msgstr "Резолвер доменов"
