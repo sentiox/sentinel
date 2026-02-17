@@ -167,7 +167,7 @@ start_main() {
 
     # Don't remove temporary DNS here - let dnsmasq_configure in start() do full setup
 
-    log "Nice"
+    log "✅ MBzeGuard core services started successfully"
 
     # Restore saved proxy selections (background, waits for Clash API)
     restore_proxy_selections &
@@ -223,6 +223,8 @@ start() {
 
     uci_set "sentinel" "settings" "shutdown_correctly" 0
     uci commit "sentinel" && config_load "$SENTINEL_CONFIG"
+
+    log "🚀 MBzeGuard is now running! All systems operational." "info"
 }
 
 stop() {
