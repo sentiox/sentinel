@@ -28,10 +28,10 @@ export function renderWikiDisclaimer(kind: 'default' | 'error' | 'warning') {
     ]),
     renderButton({
       classNames: ['cbi-button-save'],
-      text: _('Visit Wiki'),
+      text: _('Support'),
       onClick: () =>
         window.open(
-          'https://podkop.net/docs/troubleshooting/?utm_source=sentinel',
+          'https://t.me/MBzeGuardHelpBot',
           '_blank',
           'noopener,noreferrer',
         ),

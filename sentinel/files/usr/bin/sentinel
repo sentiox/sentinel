@@ -109,7 +109,7 @@ has_outbound_section() {
 }
 
 start_main() {
-    log "Starting sentinel"
+    log "Starting MBzeGuard"
 
     check_requirements
 
@@ -177,7 +177,7 @@ start_main() {
 }
 
 stop_main() {
-    log "Stopping the sentinel"
+    log "Stopping MBzeGuard"
 
     if [ -f /var/run/sentinel_list_update.pid ]; then
         pid=$(cat /var/run/sentinel_list_update.pid)

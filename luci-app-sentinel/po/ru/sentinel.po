@@ -95,8 +95,8 @@ msgstr "Списки сообщества"
 msgid "Config File Path"
 msgstr "Путь к файлу конфигурации"
 
-msgid "Configuration for Sentinel service"
-msgstr "Настройки сервиса Sentinel"
+msgid "Configuration for MBzeGuard service"
+msgstr "Настройки сервиса MBzeGuard"
 
 msgid "Configuration Type"
 msgstr "Тип конфигурации"
@@ -482,14 +482,14 @@ msgstr "Путь должен заканчиваться на cache.db"
 msgid "Pending"
 msgstr "Ожидает запуска"
 
-msgid "Sentinel"
-msgstr "Sentinel"
+msgid "MBzeGuard"
+msgstr "MBzeGuard"
 
-msgid "Sentinel Settings"
-msgstr "Настройки sentinel"
+msgid "MBzeGuard Settings"
+msgstr "Настройки MBzeGuard"
 
-msgid "Sentinel will not modify your DHCP configuration"
-msgstr "Sentinel не будет изменять вашу конфигурацию DHCP."
+msgid "MBzeGuard will not modify your DHCP configuration"
+msgstr "MBzeGuard не будет изменять вашу конфигурацию DHCP."
 
 msgid "Proxy Configuration URL"
 msgstr "URL конфигурации прокси"
@@ -770,8 +770,8 @@ msgstr "Ошибки валидации:"
 msgid "View logs"
 msgstr "Посмотреть логи"
 
-msgid "Visit Wiki"
-msgstr "Перейти в wiki"
+msgid "Support"
+msgstr "Поддержка"
 
 msgid "vless://, ss://, trojan://, socks4/5://, hy2/hysteria2:// links"
 msgstr ""

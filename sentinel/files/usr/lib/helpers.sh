@@ -274,9 +274,7 @@ get_device_model() {
 }
 
 get_sentinel_user_agent() {
-    local model
-    model=$(get_device_model)
-    echo "sentinel/${SENTINEL_VERSION} Platform/openwrt Model/${model}"
+    echo "MBzeGuard/${SENTINEL_VERSION}/router"
 }
 
 download_to_file() {

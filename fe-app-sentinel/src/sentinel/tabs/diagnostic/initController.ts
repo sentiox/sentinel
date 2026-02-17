@@ -426,36 +426,9 @@ function renderDiagnosticSystemInfoWidget() {
     );
     const isDevVersion = version === 'dev';
 
-    if (loading || unknown || !hasActualVersion || isDevVersion) {
-      return {
-        key: 'Sentinel',
-        value: version,
-      };
-    }
-
-    if (version !== `v${diagnosticsSystemInfo.sentinel_latest_version}`) {
-      logger.debug(
-        '[DIAGNOSTIC]',
-        'diagnosticsSystemInfo',
-        diagnosticsSystemInfo,
-      );
-      return {
-        key: 'Sentinel',
-        value: version,
-        tag: {
-          label: _('Outdated'),
-          kind: 'warning',
-        },
-      };
-    }
-
     return {
-      key: 'Sentinel',
+      key: 'MBzeGuard',
       value: version,
-      tag: {
-        label: _('Latest'),
-        kind: 'success',
-      },
     };
   }
 

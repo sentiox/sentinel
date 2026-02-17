@@ -1,6 +1,6 @@
 {
   "admin/services/sentinel": {
-    "title": "Sentinel",
+    "title": "MBzeGuard",
     "order": 42,
     "action": {
       "type": "view",

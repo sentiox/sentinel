@@ -23,8 +23,8 @@ const EntryPoint = {
 
     const sentinelMap = new form.Map(
       "sentinel",
-      _("Sentinel Settings"),
-      _("Configuration for Sentinel service"),
+      _("MBzeGuard Settings"),
+      _("Configuration for MBzeGuard service"),
     );
     // Enable tab views
     sentinelMap.tabbed = true;

@@ -340,7 +340,7 @@ async function renderServicesInfoWidget() {
     title: _('Services info'),
     items: [
       {
-        key: _('Sentinel'),
+        key: _('MBzeGuard'),
         value: servicesInfoWidget.data.sentinel
           ? _('✔ Enabled')
           : _('✘ Disabled'),

@@ -324,7 +324,7 @@ function createSettingsContent(section) {
     form.Flag,
     "dont_touch_dhcp",
     _("Dont Touch My DHCP!"),
-    _("Sentinel will not modify your DHCP configuration"),
+    _("MBzeGuard will not modify your DHCP configuration"),
   );
   o.default = "0";
   o.rmempty = false;
