@@ -1,0 +1,14 @@
+{
+  "admin/services/sentinel": {
+    "title": "Sentinel",
+    "order": 42,
+    "action": {
+      "type": "view",
+      "path": "sentinel/sentinel"
+    },
+    "depends": {
+			"acl": [ "luci-app-sentinel" ],
+			"uci": { "sentinel": true }
+		}
+  }
+}

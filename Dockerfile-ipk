@@ -1,0 +1,11 @@
+FROM itdoginfo/openwrt-sdk-ipk:24.10.3
+
+ARG SENTINEL_VERSION
+
+COPY ./sentinel /builder/package/feeds/utilities/sentinel
+COPY ./luci-app-sentinel /builder/package/feeds/luci/luci-app-sentinel
+
+RUN export SENTINEL_VERSION="${SENTINEL_VERSION}" && \
+    make defconfig && \
+    make package/sentinel/compile V=s -j4 && \
+    make package/luci-app-sentinel/compile V=s -j4
