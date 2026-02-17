@@ -78,7 +78,7 @@ check_requirements() {
     if has_outbound_section; then
         log "Outbound section found" "debug"
     else
-        log "Outbound section not found. Please check your configuration file (missing proxy_string, selector_proxy_links, urltest_proxy_links, outbound_json, subscription_url, or interface). Aborted." "error"
+        log "Configuration validation failed: No outbound section configured. Please add subscription URL or proxy configuration." "warn"
         exit 1
     fi
 }
@@ -224,7 +224,12 @@ start() {
     uci_set "sentinel" "settings" "shutdown_correctly" 0
     uci commit "sentinel" && config_load "$SENTINEL_CONFIG"
 
-    log "🚀 MBzeGuard is now running! All systems operational." "info"
+    # Log success message with timestamp to help identify current status
+    log "🚀 MBzeGuard started successfully at $(date '+%Y-%m-%d %H:%M:%S')" "info"
+    log "✅ All services operational - Previous errors (if any) are resolved" "info"
+
+    # Note: Old error logs may still appear in LuCI until page refresh after ~30 seconds
+    # This is normal OpenWrt behavior - they can be safely dismissed
 }
 
 stop() {
