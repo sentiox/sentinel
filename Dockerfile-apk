@@ -1,0 +1,11 @@
+FROM itdoginfo/openwrt-sdk-apk:09102025
+
+ARG SENTINEL_VERSION
+ENV SENTINEL_VERSION=${SENTINEL_VERSION}
+
+COPY ./sentinel /builder/package/feeds/utilities/sentinel
+COPY ./luci-app-sentinel /builder/package/feeds/luci/luci-app-sentinel
+
+RUN make defconfig && \
+    make package/sentinel/compile -j1 V=s && \
+    make package/luci-app-sentinel/compile -j1 V=s

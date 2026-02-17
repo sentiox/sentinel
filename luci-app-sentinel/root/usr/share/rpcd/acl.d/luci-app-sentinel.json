@@ -1,0 +1,28 @@
+{
+  "luci-app-sentinel": {
+    "description": "Grant UCI and RPC access to LuCI app sentinel",
+    "read": {
+      "file": {
+        "/etc/init.d/sentinel": [
+          "exec"
+        ],
+        "/usr/bin/sentinel": [
+          "exec"
+        ]
+      },
+      "ubus": {
+        "service": [
+          "list"
+        ]
+      },
+      "uci": [
+        "sentinel"
+      ]
+    },
+    "write": {
+      "uci": [
+        "sentinel"
+      ]
+    }
+  }
+}

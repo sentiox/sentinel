@@ -1,0 +1,106 @@
+name: Build packages
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  preparation:
+    name: Setup build version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+      - id: version
+        run: |
+          VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "0.$(date +%d%m%Y)")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Builder for ipk sentinel and luci-app-sentinel
+    runs-on: ubuntu-latest
+    needs: preparation
+    steps:
+      - uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Build ipk
+        uses: docker/build-push-action@v6.18.0
+        with:
+          file: ./Dockerfile-ipk
+          context: .
+          tags: sentinel:ci-ipk
+          build-args: |
+            SENTINEL_VERSION=${{ needs.preparation.outputs.version }}
+
+      - name: Create ipk Docker container
+        run: docker create --name ipk sentinel:ci-ipk
+
+      - name: Copy files from ipk Docker container
+        run: |
+          mkdir -p ./bin/ipk
+          docker cp ipk:/builder/bin/packages/x86_64/utilities/. ./bin/ipk/
+          docker cp ipk:/builder/bin/packages/x86_64/luci/. ./bin/ipk/
+
+      - name: Fix naming difference between build for packages (replace _ with -)
+        shell: bash
+        run: |
+          for f in ./bin/ipk/*.ipk; do
+            [ -e "$f" ] || continue
+            base=$(basename "$f")
+            newname=$(echo "$base" | sed 's/_/-/g')
+            mv "$f" "./bin/ipk/$newname"
+          done
+
+      - name: Filter files
+        shell: bash
+        run: |
+          VERSION="${{ needs.preparation.outputs.version }}"
+
+          mkdir -p ./filtered-bin/ipk
+          cp ./bin/ipk/luci-i18n-sentinel-ru-*.ipk "./filtered-bin/ipk/luci-i18n-sentinel-ru-${VERSION}.ipk"
+          cp ./bin/ipk/sentinel-*.ipk ./filtered-bin/ipk/
+          cp ./bin/ipk/luci-app-sentinel-*.ipk ./filtered-bin/ipk/
+
+      - name: Remove Docker container
+        run: docker rm ipk
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: release-files-${{ github.ref_name }}-ipk
+          path: ./filtered-bin/ipk/*.ipk
+          retention-days: 1
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5.0.0
+      - name: Create release dir
+        run: mkdir -p ./filtered-bin/release
+
+      - name: Download ipk artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-files-${{ github.ref_name }}-ipk
+          path: ./filtered-bin/release
+
+      - name: Release
+        uses: softprops/action-gh-release@v2.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./filtered-bin/release/*.*
+          draft: false
+          prerelease: false
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
