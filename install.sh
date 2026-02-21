@@ -121,16 +121,24 @@ main() {
         pkg_ext='ipk'
     fi
 
-    # Get download URLs: try GitHub API first, fallback to HTML page parsing
-    local download_urls
-    download_urls=$(wget -q -T 10 -O - "https://api.github.com/repos/sentiox/sentinel/releases/latest" 2>/dev/null | grep -o "https://[^\"[:space:]]*\.$pkg_ext")
+    # Get latest version tag from Atom feed (no API auth required)
+    local latest_tag
+    latest_tag=$(wget -q -T 15 -O - "https://github.com/sentiox/sentinel/releases.atom" 2>/dev/null | \
+        grep -o 'releases/tag/[^"<]*' | head -1 | sed 's|releases/tag/||')
 
+    # Get download URLs from expanded_assets (works without GitHub API)
+    local download_urls
+    if [ -n "$latest_tag" ]; then
+        download_urls=$(wget -q -T 15 -O - "https://github.com/sentiox/sentinel/releases/expanded_assets/$latest_tag" 2>/dev/null | \
+            grep -o "releases/download[^\"]*\.$pkg_ext" | \
+            sed 's|^|https://github.com/sentiox/sentinel/|')
+    fi
+
+    # Fallback: try GitHub API
     if [ -z "$download_urls" ]; then
-        msg "GitHub API unavailable, using releases page..."
-        download_urls=$(wget -q -T 15 -O - "$RELEASES_URL" 2>/dev/null | \
-            grep -o "href=\"[^\"]*sentinel[^\"]*\.$pkg_ext\"" | \
-            sed 's/href="//;s/"$//' | \
-            sed 's|^|https://github.com|')
+        msg "Trying GitHub API..."
+        download_urls=$(wget -q -T 10 -O - "https://api.github.com/repos/sentiox/sentinel/releases/latest" 2>/dev/null | \
+            grep -o "https://[^\"[:space:]]*\.$pkg_ext")
     fi
 
     if [ -z "$download_urls" ]; then
