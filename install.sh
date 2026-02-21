@@ -1,7 +1,7 @@
 #!/bin/sh
 # shellcheck shell=dash
 
-REPO="https://api.github.com/repos/sentiox/sentinel/releases/latest"
+RELEASES_URL="https://github.com/sentiox/sentinel/releases/latest"
 DOWNLOAD_DIR="/tmp/sentinel"
 COUNT=3
 
@@ -114,23 +114,31 @@ main() {
         msg "Installing sentinel..."
     fi
 
-    if command -v curl >/dev/null 2>&1; then
-        check_response=$(curl -s "https://api.github.com/repos/sentiox/sentinel/releases/latest")
-
-        if echo "$check_response" | grep -q 'API rate limit '; then
-            msg "You've reached the GitHub rate limit. Repeat in five minutes."
-            exit 1
-        fi
-    fi
-
-    local grep_url_pattern
+    local pkg_ext
     if [ "$PKG_IS_APK" -eq 1 ]; then
-        grep_url_pattern='https://[^"[:space:]]*\.apk'
+        pkg_ext='apk'
     else
-        grep_url_pattern='https://[^"[:space:]]*\.ipk'
+        pkg_ext='ipk'
     fi
 
-    wget -qO- "$REPO" | grep -o "$grep_url_pattern" | while read -r url; do
+    # Get download URLs: try GitHub API first, fallback to HTML page parsing
+    local download_urls
+    download_urls=$(wget -q -T 10 -O - "https://api.github.com/repos/sentiox/sentinel/releases/latest" 2>/dev/null | grep -o "https://[^\"[:space:]]*\.$pkg_ext")
+
+    if [ -z "$download_urls" ]; then
+        msg "GitHub API unavailable, using releases page..."
+        download_urls=$(wget -q -T 15 -O - "$RELEASES_URL" 2>/dev/null | \
+            grep -o "href=\"[^\"]*sentinel[^\"]*\.$pkg_ext\"" | \
+            sed 's/href="//;s/"$//' | \
+            sed 's|^|https://github.com|')
+    fi
+
+    if [ -z "$download_urls" ]; then
+        msg "Failed to get download URLs. Check internet connection."
+        exit 1
+    fi
+
+    echo "$download_urls" | while read -r url; do
         filename=$(basename "$url")
         filepath="$DOWNLOAD_DIR/$filename"
 
