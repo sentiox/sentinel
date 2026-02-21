@@ -400,9 +400,18 @@ dnsmasq_configure() {
     local current_server
     current_server="$(uci_get "dhcp" "@dnsmasq[0]" "server")"
 
-    # Skip reconfiguration only if EXACTLY configured (no extra DNS servers like temporary 8.8.8.8)
-    if [ "$shutdown_correctly" -eq 0 ] && [ "$current_noresolv" = "1" ] && [ "$current_server" = "$SB_DNS_INBOUND_ADDRESS" ]; then
+    # When dnsmasq is already configured for sentinel (noresolv=1) after an unclean shutdown,
+    # clean up any temporary DNS servers (e.g., 8.8.8.8 added during startup fix) and return.
+    # Do NOT do a full backup here — the original DNS was already saved in the first clean run.
+    if [ "$shutdown_correctly" -eq 0 ] && [ "$current_noresolv" = "1" ]; then
         log "Previous shutdown was not correct, but dnsmasq is already configured for sentinel"
+        if [ "$current_server" != "$SB_DNS_INBOUND_ADDRESS" ]; then
+            log "Removing temporary DNS servers from dnsmasq (cleanup after startup fix)"
+            uci_remove "dhcp" "@dnsmasq[0]" "server"
+            uci_add_list "dhcp" "@dnsmasq[0]" "server" "$SB_DNS_INBOUND_ADDRESS"
+            uci_commit "dhcp"
+            /etc/init.d/dnsmasq restart
+        fi
         return 0
     fi
 
