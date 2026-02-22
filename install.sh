@@ -103,11 +103,12 @@ update_config() {
 main() {
     check_system
     sing_box
-    mihomo
 
     /usr/sbin/ntpd -q -p 194.190.168.1 -p 216.239.35.0 -p 216.239.35.4 -p 162.159.200.1 -p 162.159.200.123
 
     pkg_list_update || { echo "Packages list update failed"; exit 1; }
+
+    mihomo
 
     if [ -f "/etc/init.d/sentinel" ]; then
         msg "Sentinel is already installed. Upgrading..."
@@ -325,16 +326,52 @@ sing_box() {
 }
 
 mihomo() {
-    if pkg_is_installed "mihomo"; then
-        msg "mihomo already installed"
+    if command -v mihomo >/dev/null 2>&1; then
+        msg "mihomo already installed: $(mihomo -v 2>/dev/null | head -1)"
         return
     fi
 
-    msg "Installing mihomo..."
-    if [ "$PKG_IS_APK" -eq 1 ]; then
-        apk add mihomo || msg "Failed to install mihomo. Try manually: apk add mihomo"
+    # Map uname -m to mihomo release arch
+    local machine arch
+    machine=$(uname -m)
+    case "$machine" in
+        aarch64)        arch="arm64" ;;
+        x86_64)         arch="amd64" ;;
+        armv7l|armv7)   arch="armv7" ;;
+        mipsel)         arch="mipsle-softfloat" ;;
+        mips)           arch="mips-softfloat" ;;
+        *)
+            msg "Unsupported arch: $machine. Install mihomo manually: https://github.com/MetaCubeX/mihomo/releases"
+            return
+            ;;
+    esac
+
+    msg "Downloading mihomo for linux-$arch..."
+
+    local latest_tag
+    latest_tag=$(wget -q -T 15 -O - "https://api.github.com/repos/MetaCubeX/mihomo/releases/latest" 2>/dev/null | \
+        grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+
+    if [ -z "$latest_tag" ]; then
+        msg "Failed to get mihomo version. Install manually: https://github.com/MetaCubeX/mihomo/releases"
+        return
+    fi
+
+    local url="https://github.com/MetaCubeX/mihomo/releases/download/${latest_tag}/mihomo-linux-${arch}-${latest_tag}.gz"
+    local tmpgz="/tmp/mihomo.gz"
+
+    msg "Downloading $url..."
+    if wget -q -T 60 -O "$tmpgz" "$url" && [ -s "$tmpgz" ]; then
+        gunzip -f "$tmpgz"
+        local bin="/tmp/mihomo-linux-${arch}-${latest_tag}"
+        [ ! -f "$bin" ] && bin="${tmpgz%.gz}"
+        chmod +x "$bin"
+        mv "$bin" /usr/bin/mihomo
+        rm -f "$tmpgz"
+        msg "mihomo installed: $(mihomo -v 2>/dev/null | head -1)"
     else
-        opkg install mihomo || msg "Failed to install mihomo. Try manually: opkg update && opkg install mihomo"
+        rm -f "$tmpgz"
+        msg "Failed to download mihomo. Install manually: https://github.com/MetaCubeX/mihomo/releases"
     fi
 }
 
