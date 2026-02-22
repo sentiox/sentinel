@@ -108,7 +108,7 @@ main() {
 
     pkg_list_update || { echo "Packages list update failed"; exit 1; }
 
-    mihomo
+    install_mihomo
 
     if [ -f "/etc/init.d/sentinel" ]; then
         msg "Sentinel is already installed. Upgrading..."
@@ -325,9 +325,9 @@ sing_box() {
     fi
 }
 
-mihomo() {
-    if command -v mihomo >/dev/null 2>&1; then
-        msg "mihomo already installed: $(mihomo -v 2>/dev/null | head -1)"
+install_mihomo() {
+    if [ -x /usr/bin/mihomo ]; then
+        msg "mihomo already installed: $(/usr/bin/mihomo -v 2>/dev/null | head -1)"
         return
     fi
 
