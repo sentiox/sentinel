@@ -251,7 +251,7 @@ stop_main() {
     fi
 
     log "Stop sing-box"
-    /etc/init.d/sing-box stop
+    [ -f /etc/init.d/sing-box ] && /etc/init.d/sing-box stop
 
     log "Stop Mihomo (if running)"
     mihomo_stop
