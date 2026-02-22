@@ -103,6 +103,7 @@ update_config() {
 main() {
     check_system
     sing_box
+    mihomo
 
     /usr/sbin/ntpd -q -p 194.190.168.1 -p 216.239.35.0 -p 216.239.35.4 -p 162.159.200.1 -p 162.159.200.123
 
@@ -320,6 +321,20 @@ sing_box() {
         msg "Removing old version..."
         service sentinel stop
         pkg_remove sing-box
+    fi
+}
+
+mihomo() {
+    if pkg_is_installed "mihomo"; then
+        msg "mihomo already installed"
+        return
+    fi
+
+    msg "Installing mihomo..."
+    if [ "$PKG_IS_APK" -eq 1 ]; then
+        apk add mihomo || msg "Failed to install mihomo. Try manually: apk add mihomo"
+    else
+        opkg install mihomo || msg "Failed to install mihomo. Try manually: opkg update && opkg install mihomo"
     fi
 }
 

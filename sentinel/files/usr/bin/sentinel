@@ -30,6 +30,10 @@ check_required_file "$SENTINEL_LIB/rulesets.sh"
 . "$SENTINEL_LIB/sing_box_config_facade.sh"
 . "$SENTINEL_LIB/logging.sh"
 . "$SENTINEL_LIB/rulesets.sh"
+. "$SENTINEL_LIB/mihomo_handler.sh"
+
+# Set to 1 if any section uses Mihomo YAML subscription
+MIHOMO_MODE=0
 
 config_load "$SENTINEL_CONFIG"
 
@@ -37,13 +41,20 @@ check_requirements() {
     log "Check Requirements"
 
     local sing_box_version jq_version coreutils_base64_version
-    sing_box_version="$(sing-box version | head -n1 | awk '{print $3}')"
-    jq_version="$(jq --version | awk -F- '{print $2}')"
-    coreutils_base64_version="$(base64 --version | head -n1 | awk '{print $4}')"
+    sing_box_version="$(sing-box version 2>/dev/null | head -n1 | awk '{print $3}')"
+    jq_version="$(jq --version 2>/dev/null | awk -F- '{print $2}')"
+    coreutils_base64_version="$(base64 --version 2>/dev/null | head -n1 | awk '{print $4}')"
+
+    local mihomo_available=0
+    command -v mihomo >/dev/null 2>&1 && mihomo_available=1
 
     if [ -z "$sing_box_version" ]; then
-        log "Package 'sing-box' is not installed. Aborted." "error"
-        exit 1
+        if [ "$mihomo_available" = "1" ]; then
+            log "sing-box not installed, will use Mihomo" "debug"
+        else
+            log "Neither 'sing-box' nor 'mihomo' is installed. Install mihomo: opkg update && opkg install mihomo. Aborted." "error"
+            exit 1
+        fi
     else
         if ! is_min_package_version "$sing_box_version" "$SB_REQUIRED_VERSION"; then
             log "Package 'sing-box' version ($sing_box_version) is lower than the required minimum ($SB_REQUIRED_VERSION). Update sing-box: opkg update && opkg remove sing-box && opkg install sing-box. Aborted." "error"
@@ -57,8 +68,12 @@ check_requirements() {
     fi
 
     if [ -z "$jq_version" ]; then
-        log "Package 'jq' is not installed. Aborted." "error"
-        exit 1
+        if [ "$mihomo_available" = "0" ]; then
+            log "Package 'jq' is not installed. Aborted." "error"
+            exit 1
+        else
+            log "jq not installed, Mihomo mode does not require jq" "debug"
+        fi
     elif ! is_min_package_version "$jq_version" "$JQ_REQUIRED_VERSION"; then
         log "Package 'jq' version ($jq_version) is lower than the required minimum ($JQ_REQUIRED_VERSION). Aborted." "error"
         exit 1
@@ -106,6 +121,23 @@ has_outbound_section() {
     config_foreach _check_outbound_section "section"
 
     return $section_exists
+}
+
+# Called by config_foreach to detect if a section uses Mihomo YAML subscription.
+# Sets global MIHOMO_MODE=1 and prepares the Mihomo config if detected.
+_detect_mihomo_section() {
+    local section="$1"
+    local connection_type proxy_config_type
+    config_get connection_type "$section" "connection_type"
+    config_get proxy_config_type "$section" "proxy_config_type"
+
+    [ "$connection_type" != "proxy" ] && return
+    [ "$proxy_config_type" != "subscription" ] && return
+
+    if mihomo_init_from_subscription "$section"; then
+        MIHOMO_MODE=1
+        log "Mihomo mode enabled for section: $section"
+    fi
 }
 
 start_main() {
@@ -158,12 +190,21 @@ start_main() {
     # base
     route_table_rule_mark
     create_nft_rules
-    sing_box_configure_service
 
-    # sing-box
-    sing_box_init_config
-    config_foreach add_cron_job "section"
-    /etc/init.d/sing-box start
+    # Detect Mihomo YAML subscription in any section
+    config_foreach _detect_mihomo_section "section"
+
+    if [ "$MIHOMO_MODE" = "1" ]; then
+        log "Mihomo mode: starting Mihomo instead of sing-box"
+        mihomo_start
+        config_foreach add_cron_job "section"
+    else
+        # Normal sing-box flow
+        sing_box_configure_service
+        sing_box_init_config
+        config_foreach add_cron_job "section"
+        /etc/init.d/sing-box start
+    fi
 
     # Don't remove temporary DNS here - let dnsmasq_configure in start() do full setup
 
@@ -211,6 +252,9 @@ stop_main() {
 
     log "Stop sing-box"
     /etc/init.d/sing-box stop
+
+    log "Stop Mihomo (if running)"
+    mihomo_stop
 }
 
 start() {
