@@ -368,7 +368,7 @@ install_mihomo() {
         chmod +x "$bin"
         mv "$bin" /usr/bin/mihomo
         rm -f "$tmpgz"
-        msg "mihomo installed: $(mihomo -v 2>/dev/null | head -1)"
+        msg "mihomo installed: $(/usr/bin/mihomo -v 2>/dev/null | head -1)"
     else
         rm -f "$tmpgz"
         msg "Failed to download mihomo. Install manually: https://github.com/MetaCubeX/mihomo/releases"
